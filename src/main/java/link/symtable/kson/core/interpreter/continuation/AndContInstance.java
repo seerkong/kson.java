@@ -1,23 +1,28 @@
 package link.symtable.kson.core.interpreter.continuation;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 import link.symtable.kson.core.interpreter.ContRunResult;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
-import link.symtable.kson.core.node.KsArray;
+import link.symtable.kson.core.node.KsBoolean;
 import link.symtable.kson.core.node.KsContinuation;
+import link.symtable.kson.core.node.KsListNode;
 import link.symtable.kson.core.node.KsNode;
 
-public class ArrayContInstance extends KsContinuation {
+public class AndContInstance extends KsContinuation {
     private LinkedList<KsNode> pendingNodes;
-    private List<KsNode> evaledNodes;
-    public ArrayContInstance(KsContinuation currentCont, KsArray nodeToRun) {
+    private boolean result;
+
+    public AndContInstance(KsContinuation currentCont, KsListNode expr) {
         super(currentCont);
-        pendingNodes = new LinkedList<>(nodeToRun.getItems());
-        evaledNodes = new ArrayList<>();
+        pendingNodes = new LinkedList<>();
+
+        KsListNode iter = expr;
+        while (iter != KsListNode.NIL) {
+            pendingNodes.add(iter.getValue());
+            iter = iter.getNext();
+        }
     }
 
     public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
@@ -26,7 +31,7 @@ public class ArrayContInstance extends KsContinuation {
                     .nextAction(ExecAction.RUN_CONT)
                     .nextCont(getNext())
                     .nextNodeToRun(currentNodeToRun)
-                    .newLastValue(new KsArray(evaledNodes))
+                    .newLastValue(KsBoolean.TRUE)
                     .build();
         } else {
             KsNode nextToRun = pendingNodes.pollFirst();
@@ -37,7 +42,15 @@ public class ArrayContInstance extends KsContinuation {
 
     @Override
     public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
-        evaledNodes.add(lastValue);
-        return initNextRun(state, lastValue, currentNodeToRun);
+        if (lastValue.toBoolean()) {
+            return initNextRun(state, lastValue, currentNodeToRun);
+        } else {
+            return ContRunResult.builder()
+                    .nextAction(ExecAction.RUN_CONT)
+                    .nextCont(getNext())
+                    .nextNodeToRun(currentNodeToRun)
+                    .newLastValue(KsBoolean.FALSE)
+                    .build();
+        }
     }
 }

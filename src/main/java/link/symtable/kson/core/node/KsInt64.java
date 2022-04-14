@@ -5,10 +5,10 @@ import java.util.Objects;
 import lombok.Getter;
 
 @Getter
-public class KsonInt64 extends KsonNumber {
+public class KsInt64 extends KsNumber {
     private long value;
 
-    public KsonInt64(long value) {
+    public KsInt64(long value) {
         this.value = value;
     }
 
@@ -30,10 +30,10 @@ public class KsonInt64 extends KsonNumber {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof KsonInt64)) {
+        if (!(obj instanceof KsInt64)) {
             return false;
         }
-        KsonInt64 other = (KsonInt64) obj;
+        KsInt64 other = (KsInt64) obj;
         return Objects.equals(this.value, other.toPlainObject());
     }
 
@@ -44,7 +44,7 @@ public class KsonInt64 extends KsonNumber {
     public boolean isInt64() {
         return true;
     }
-    public KsonInt64 asInt64() {
+    public KsInt64 asInt64() {
         return this;
     }
 }

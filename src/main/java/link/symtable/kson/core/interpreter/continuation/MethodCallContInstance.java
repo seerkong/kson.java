@@ -11,55 +11,56 @@ import link.symtable.kson.core.interpreter.ContRunResult;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.interpreter.oopsupport.SupportMethodCall;
-import link.symtable.kson.core.node.KsonArray;
-import link.symtable.kson.core.node.KsonListNode;
-import link.symtable.kson.core.node.KsonNode;
+import link.symtable.kson.core.node.KsArray;
+import link.symtable.kson.core.node.KsContinuation;
+import link.symtable.kson.core.node.KsListNode;
+import link.symtable.kson.core.node.KsNode;
 
-public class MethodCallContInstance extends Continuation {
-    private KsonNode targetNode;
-    private KsonNode targetEvaled = null;
+public class MethodCallContInstance extends KsContinuation {
+    private KsNode targetNode;
+    private KsNode targetEvaled = null;
 
-    private LinkedList<Pair<String, KsonArray>> pendingMethodAndArgsPairs = new LinkedList<>();
+    private LinkedList<Pair<String, KsArray>> pendingMethodAndArgsPairs = new LinkedList<>();
     ;
-    private Pair<String, KsonArray> currentMethodAndArgsPairs;
-    private LinkedList<Pair<String, KsonArray>> evaledMethodAndArgsPairs = new LinkedList<>();
+    private Pair<String, KsArray> currentMethodAndArgsPairs;
+    private LinkedList<Pair<String, KsArray>> evaledMethodAndArgsPairs = new LinkedList<>();
     ;
 
-    public MethodCallContInstance(Continuation currentCont, KsonListNode initExpr) {
+    public MethodCallContInstance(KsContinuation currentCont, KsListNode initExpr) {
         super(currentCont);
         targetNode = initExpr.getNext().getValue();
 
-        KsonListNode iter = initExpr.getNext().getNext();
-        while (iter != KsonListNode.NIL) {
+        KsListNode iter = initExpr.getNext().getNext();
+        while (iter != KsListNode.NIL) {
             if (!iter.getValue().isListNode()) {
                 throw new RuntimeException("method and args should be a list");
             }
-            KsonListNode methodAndArgsList = iter.getValue().asListNode();
+            KsListNode methodAndArgsList = iter.getValue().asListNode();
             String methodName = methodAndArgsList.getValue().asWord().getValue();
-            KsonListNode methodArgIter = methodAndArgsList.getNext();
-            List<KsonNode> methodArgs = new ArrayList<>();
-            while (methodArgIter != KsonListNode.NIL) {
+            KsListNode methodArgIter = methodAndArgsList.getNext();
+            List<KsNode> methodArgs = new ArrayList<>();
+            while (methodArgIter != KsListNode.NIL) {
                 methodArgs.add(methodArgIter.getValue());
 
                 methodArgIter = methodArgIter.getNext();
             }
-            pendingMethodAndArgsPairs.add(new ImmutablePair<>(methodName, new KsonArray(methodArgs)));
+            pendingMethodAndArgsPairs.add(new ImmutablePair<>(methodName, new KsArray(methodArgs)));
             iter = iter.getNext();
         }
     }
 
-    public ContRunResult initNextRun(ExecState state, KsonNode lastValue, KsonNode currentNodeToRun) {
+    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         if (targetEvaled == null) {
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
             return nextCont.initNextRun(state, lastValue, targetNode);
         } else if (pendingMethodAndArgsPairs.size() == 0) {
-            KsonNode targetNode = targetEvaled;
+            KsNode targetNode = targetEvaled;
             while (evaledMethodAndArgsPairs.size() > 0) {
-                Pair<String, KsonArray> methodAndArgs = evaledMethodAndArgsPairs.pollFirst();
+                Pair<String, KsArray> methodAndArgs = evaledMethodAndArgsPairs.pollFirst();
                 if (!(targetNode instanceof SupportMethodCall)) {
                     throw new RuntimeException("get subscript not supported");
                 }
-                KsonNode[] argsArr = methodAndArgs.getRight().getItems().toArray(new KsonNode[0]);
+                KsNode[] argsArr = methodAndArgs.getRight().getItems().toArray(new KsNode[0]);
                 targetNode = ((SupportMethodCall) targetNode).callMethod(state, methodAndArgs.getLeft(), argsArr);
             }
 
@@ -77,7 +78,7 @@ public class MethodCallContInstance extends Continuation {
     }
 
     @Override
-    public ContRunResult run(ExecState state, KsonNode lastValue, KsonNode currentNodeToRun) {
+    public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         if (currentMethodAndArgsPairs == null) {
             // eval method chain first target
             targetEvaled = lastValue;

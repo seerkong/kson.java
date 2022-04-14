@@ -1,6 +1,6 @@
 package link.symtable.kson.core.interpreter;
 
-import link.symtable.kson.core.node.KsonNode;
+import link.symtable.kson.core.node.KsNode;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,5 +10,5 @@ import lombok.Data;
 @Builder
 @Data
 public class ExecResult {
-    KsonNode data;
+    KsNode data;
 }

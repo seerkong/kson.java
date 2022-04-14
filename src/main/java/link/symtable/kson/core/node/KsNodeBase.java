@@ -3,7 +3,7 @@ package link.symtable.kson.core.node;
 import org.apache.commons.lang3.NotImplementedException;
 
 
-public abstract class KsonNodeBase implements KsonNode {
+public abstract class KsNodeBase implements KsNode {
     public Object toPlainObject() {
         throw new NotImplementedException("NotImplementedException");
     }
@@ -16,7 +16,7 @@ public abstract class KsonNodeBase implements KsonNode {
         return false;
     }
 
-    public KsonBoolean asBoolean() {
+    public KsBoolean asBoolean() {
         throw new RuntimeException("cannot converted to KsonBoolean");
     }
 
@@ -27,7 +27,7 @@ public abstract class KsonNodeBase implements KsonNode {
         return false;
     }
 
-    public KsonWord asWord() {
+    public KsWord asWord() {
         throw new RuntimeException("cannot converted to KsonWord");
     }
 
@@ -37,49 +37,57 @@ public abstract class KsonNodeBase implements KsonNode {
     public boolean isSymbol(String inner) {
         return false;
     }
-    public KsonSymbol asSymbol() {
+    public KsSymbol asSymbol() {
         throw new RuntimeException("cannot converted to KsonWord");
     }
 
     public boolean isString() {
         return false;
     }
-    public KsonString asString() {
+    public KsString asString() {
         throw new RuntimeException("cannot converted to KsonString");
     }
 
     public boolean isInt64() {
         return false;
     }
-    public KsonInt64 asInt64() {
+    public KsInt64 asInt64() {
         throw new RuntimeException("cannot converted to KsonInt64");
     }
 
     public boolean isDouble() {
         return false;
     }
-    public KsonDouble asDouble() {
+    public KsDouble asDouble() {
         throw new RuntimeException("cannot converted to KsonDouble");
     }
 
     public boolean isListNode() {
         return false;
     }
-    public KsonListNode asListNode() {
+    public KsListNode asListNode() {
         throw new RuntimeException("cannot converted to ListNode");
     }
 
     public boolean isArray() {
         return false;
     }
-    public KsonArray asArray() {
+    public KsArray asArray() {
         throw new RuntimeException("cannot converted to KsonArray");
     }
 
     public boolean isMap() {
         return false;
     }
-    public KsonMap asMap() {
+    public KsMap asMap() {
         throw new RuntimeException("cannot converted to KsonMap");
+    }
+
+
+    public boolean isFunction() {
+        return false;
+    }
+    public KsFunction asFunction() {
+        throw new RuntimeException("cannot converted to KsonFunction");
     }
 }

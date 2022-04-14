@@ -20,29 +20,29 @@ import link.symtable.kson.core.interpreter.oopsupport.SupportMethodCall;
 import lombok.Getter;
 
 @Getter
-public class KsonMap extends KsonContainerNode implements SupportMethodCall, Map {
-    public static KsonMap EMPTY = new KsonMap();
-    public LinkedHashMap<String, KsonNode> value;
+public class KsMap extends KsContainerNode implements SupportMethodCall, Map {
+    public static KsMap EMPTY = new KsMap();
+    public LinkedHashMap<String, KsNode> value;
 
-    public KsonMap(LinkedHashMap<String, KsonNode> value) {
+    public KsMap(LinkedHashMap<String, KsNode> value) {
         this.value = value;
     }
 
-    public KsonMap() {
-        this(new LinkedHashMap<String, KsonNode>());
+    public KsMap() {
+        this(new LinkedHashMap<String, KsNode>());
     }
 
-    public KsonMap(Pair<String, KsonNode>[] members) {
+    public KsMap(Pair<String, KsNode>[] members) {
         this(entriesToMap(new ArrayList<>(Arrays.asList(members))));
     }
 
-    public KsonMap(Collection<Pair<String, KsonNode>> members) {
+    public KsMap(Collection<Pair<String, KsNode>> members) {
         this(entriesToMap(new ArrayList<>(members)));
     }
 
-    private static LinkedHashMap<String, KsonNode> entriesToMap(Collection<Pair<String, KsonNode>> members) {
-        LinkedHashMap<String, KsonNode> map = new LinkedHashMap<>();
-        for (Map.Entry<String, KsonNode> member : members) {
+    private static LinkedHashMap<String, KsNode> entriesToMap(Collection<Pair<String, KsNode>> members) {
+        LinkedHashMap<String, KsNode> map = new LinkedHashMap<>();
+        for (Map.Entry<String, KsNode> member : members) {
             map.put(member.getKey(), member.getValue());
         }
         return map;
@@ -51,7 +51,7 @@ public class KsonMap extends KsonContainerNode implements SupportMethodCall, Map
     public String toString() {
         StringBuilder sb = new StringBuilder();
         List<String> items = new ArrayList<>();
-        for (Map.Entry<String, KsonNode> member : value.entrySet()) {
+        for (Map.Entry<String, KsNode> member : value.entrySet()) {
             items.add(String.format("\"%s\": %s", member.getKey(), member.getValue()));
         }
         String innerItemsStr = items.stream()
@@ -66,17 +66,17 @@ public class KsonMap extends KsonContainerNode implements SupportMethodCall, Map
 
     public Object toPlainObject() {
         Map<String, Object> result = new HashMap<>();
-        for (Map.Entry<String, KsonNode> member : value.entrySet()) {
+        for (Map.Entry<String, KsNode> member : value.entrySet()) {
             result.put(member.getKey(), member.getValue().toPlainObject());
         }
         return result;
     }
 
-    public Map<String, KsonNode> getValue() {
+    public Map<String, KsNode> getValue() {
         return value;
     }
 
-    public KsonNode get(String key) {
+    public KsNode get(String key) {
         return value.get(key);
     }
 
@@ -107,7 +107,7 @@ public class KsonMap extends KsonContainerNode implements SupportMethodCall, Map
 
     @Override
     public Object put(Object key, Object value) {
-        return getValue().put((String)key, (KsonNode) value);
+        return getValue().put((String)key, (KsNode) value);
     }
 
     @Override
@@ -136,19 +136,19 @@ public class KsonMap extends KsonContainerNode implements SupportMethodCall, Map
     }
 
     @Override
-    public Set<Entry<String, KsonNode>> entrySet() {
+    public Set<Entry<String, KsNode>> entrySet() {
         return getValue().entrySet();
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof KsonMap)) {
+        if (!(obj instanceof KsMap)) {
             return false;
         }
-        KsonMap other = (KsonMap) obj;
+        KsMap other = (KsMap) obj;
         if (value.size() != other.getValue().size()) {
             return false;
         }
-        for (Map.Entry<String, KsonNode> member : value.entrySet()) {
+        for (Map.Entry<String, KsNode> member : value.entrySet()) {
             if (!other.getValue().containsKey(member.getKey())
                     || Objects.equals(other.getValue().get(member.getKey()), value.get(member.getKey()))) {
                 return false;
@@ -165,23 +165,23 @@ public class KsonMap extends KsonContainerNode implements SupportMethodCall, Map
         return num;
     }
 
-    public KsonNode subscriptByString(ExecState state, String fieldName) {
+    public KsNode subscriptByString(ExecState state, String fieldName) {
         if (value.containsKey(fieldName)) {
             return value.get(fieldName);
         } else {
-            return KsonNull.NULL;
+            return KsNull.NULL;
         }
     }
 
     @Override
-    public KsonNode callMethod(ExecState state, String methodName, KsonNode[] args) {
+    public KsNode callMethod(ExecState state, String methodName, KsNode[] args) {
         if ("put".equals(methodName)) {
             value.put(args[0].asString().getValue(), args[1]);
             return this;
         } else if ("keys".equals(methodName)) {
-            List<KsonNode> keys = new ArrayList<>();
-            value.keySet().forEach(k -> keys.add(new KsonString(k)));
-            return new KsonArray(keys);
+            List<KsNode> keys = new ArrayList<>();
+            value.keySet().forEach(k -> keys.add(new KsString(k)));
+            return new KsArray(keys);
         } else {
             throw new NotImplementedException("methodName " + methodName + " is not supported");
         }
@@ -190,7 +190,7 @@ public class KsonMap extends KsonContainerNode implements SupportMethodCall, Map
     public boolean isMap() {
         return true;
     }
-    public KsonMap asMap() {
+    public KsMap asMap() {
         return this;
     }
 }

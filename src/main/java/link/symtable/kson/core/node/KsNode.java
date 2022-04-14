@@ -1,37 +1,40 @@
 package link.symtable.kson.core.node;
 
-public interface KsonNode {
+public interface KsNode {
     Object toPlainObject();
     boolean toBoolean();
 
     boolean isBoolean();
-    KsonBoolean asBoolean();
+    KsBoolean asBoolean();
 
     boolean isWord();
     boolean isWord(String inner);
-    KsonWord asWord();
+    KsWord asWord();
 
     boolean isSymbol();
     boolean isSymbol(String inner);
-    KsonSymbol asSymbol();
+    KsSymbol asSymbol();
 
     boolean isString();
-    KsonString asString();
+    KsString asString();
 
 
 
     boolean isInt64();
-    KsonInt64 asInt64();
+    KsInt64 asInt64();
 
     boolean isDouble();
-    KsonDouble asDouble();
+    KsDouble asDouble();
 
     boolean isListNode();
-    KsonListNode asListNode();
+    KsListNode asListNode();
 
     boolean isArray();
-    KsonArray asArray();
+    KsArray asArray();
 
     boolean isMap();
-    KsonMap asMap();
+    KsMap asMap();
+
+    boolean isFunction();
+    KsFunction asFunction();
 }

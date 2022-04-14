@@ -6,33 +6,34 @@ import link.symtable.kson.core.interpreter.ContRunResult;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.interpreter.oopsupport.SupportSubscript;
-import link.symtable.kson.core.node.KsonListNode;
-import link.symtable.kson.core.node.KsonNode;
+import link.symtable.kson.core.node.KsContinuation;
+import link.symtable.kson.core.node.KsListNode;
+import link.symtable.kson.core.node.KsNode;
 
-public class SubscriptContInstance extends Continuation {
-    private LinkedList<KsonNode> pendingNodes;
-    private LinkedList<KsonNode> evaledNodes;
+public class SubscriptContInstance extends KsContinuation {
+    private LinkedList<KsNode> pendingNodes;
+    private LinkedList<KsNode> evaledNodes;
 
-    public SubscriptContInstance(Continuation currentCont, KsonListNode initExpr) {
+    public SubscriptContInstance(KsContinuation currentCont, KsListNode initExpr) {
         super(currentCont);
         pendingNodes = new LinkedList<>();
 
-        KsonListNode iter = initExpr.getNext();
-        while (iter != KsonListNode.NIL) {
+        KsListNode iter = initExpr.getNext();
+        while (iter != KsListNode.NIL) {
             pendingNodes.add(iter.getValue());
             iter = iter.getNext();
         }
         evaledNodes = new LinkedList<>();
     }
 
-    public ContRunResult initNextRun(ExecState state, KsonNode lastValue, KsonNode currentNodeToRun) {
+    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         if (pendingNodes.size() == 0) {
             if (evaledNodes.size() == 0) {
                 throw new RuntimeException("cannot eval empty expr");
             }
-            KsonNode targetNode = evaledNodes.pollFirst();
+            KsNode targetNode = evaledNodes.pollFirst();
             while (evaledNodes.size() > 0) {
-                KsonNode subscript = evaledNodes.pollFirst();
+                KsNode subscript = evaledNodes.pollFirst();
                 if (!(targetNode instanceof SupportSubscript)) {
                     throw new RuntimeException("get subscript not supported");
                 }
@@ -56,7 +57,7 @@ public class SubscriptContInstance extends Continuation {
                     .newLastValue(targetNode)
                     .build();
         } else {
-            KsonNode nextToRun = pendingNodes.pollFirst();
+            KsNode nextToRun = pendingNodes.pollFirst();
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
             return ContRunResult.builder()
                     .nextAction(ExecAction.RUN_CONT)
@@ -68,7 +69,7 @@ public class SubscriptContInstance extends Continuation {
     }
 
     @Override
-    public ContRunResult run(ExecState state, KsonNode lastValue, KsonNode currentNodeToRun) {
+    public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         evaledNodes.add(lastValue);
         return initNextRun(state, lastValue, currentNodeToRun);
     }

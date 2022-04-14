@@ -1,8 +1,9 @@
 package link.symtable.kson.core.interpreter.continuation;
 
-import link.symtable.kson.core.node.KsonListNode;
+import link.symtable.kson.core.node.KsContinuation;
+import link.symtable.kson.core.node.KsListNode;
 
 @FunctionalInterface
 public interface ContInstanceFactory {
-    Continuation create(Continuation currentCont, KsonListNode nodeToRun);
+    KsContinuation create(KsContinuation currentCont, KsListNode nodeToRun);
 }

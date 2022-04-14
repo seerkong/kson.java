@@ -1,29 +1,31 @@
 package link.symtable.kson.core.interpreter.util;
 
-import link.symtable.kson.core.node.KsonBoolean;
-import link.symtable.kson.core.node.KsonDouble;
-import link.symtable.kson.core.node.KsonFunction;
-import link.symtable.kson.core.node.KsonHostObject;
-import link.symtable.kson.core.node.KsonInt64;
-import link.symtable.kson.core.node.KsonListNode;
-import link.symtable.kson.core.node.KsonNode;
-import link.symtable.kson.core.node.KsonNull;
-import link.symtable.kson.core.node.KsonString;
-import link.symtable.kson.core.node.KsonSymbol;
-import link.symtable.kson.core.node.KsonUndefined;
+import link.symtable.kson.core.node.KsContinuation;
+import link.symtable.kson.core.node.KsBoolean;
+import link.symtable.kson.core.node.KsDouble;
+import link.symtable.kson.core.node.KsFunction;
+import link.symtable.kson.core.node.KsHostObject;
+import link.symtable.kson.core.node.KsInt64;
+import link.symtable.kson.core.node.KsListNode;
+import link.symtable.kson.core.node.KsNode;
+import link.symtable.kson.core.node.KsNull;
+import link.symtable.kson.core.node.KsString;
+import link.symtable.kson.core.node.KsSymbol;
+import link.symtable.kson.core.node.KsUndefined;
 
 public class NodeTypeHelper {
-    public static boolean isSelfEvaluatedNode(KsonNode node) {
-        return node instanceof KsonBoolean
-                || node instanceof KsonInt64
-                || node instanceof KsonDouble
-                || node instanceof KsonString
-                || node instanceof KsonSymbol
-                || node instanceof KsonNull
-                || node instanceof KsonUndefined
-                || node instanceof KsonFunction
-                || node instanceof KsonHostObject
-                || (node == KsonListNode.NIL)
+    public static boolean isSelfEvaluatedNode(KsNode node) {
+        return node instanceof KsBoolean
+                || node instanceof KsInt64
+                || node instanceof KsDouble
+                || node instanceof KsString
+                || node instanceof KsSymbol
+                || node instanceof KsNull
+                || node instanceof KsUndefined
+                || node instanceof KsFunction
+                || node instanceof KsHostObject
+                || node instanceof KsContinuation
+                || (node == KsListNode.NIL)
                 ;
     }
 }

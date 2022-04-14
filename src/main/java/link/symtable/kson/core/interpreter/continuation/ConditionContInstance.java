@@ -8,26 +8,27 @@ import org.apache.commons.lang3.tuple.Pair;
 import link.symtable.kson.core.interpreter.ContRunResult;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
-import link.symtable.kson.core.node.KsonListNode;
-import link.symtable.kson.core.node.KsonNode;
+import link.symtable.kson.core.node.KsContinuation;
+import link.symtable.kson.core.node.KsListNode;
+import link.symtable.kson.core.node.KsNode;
 
 
-public class ConditionContInstance extends Continuation {
-    private LinkedList<Pair<KsonNode, KsonListNode>> pendingPairs;
-    private KsonListNode currentBranchBlock;
-    private KsonListNode fallbackBlock = KsonListNode.NIL;
+public class ConditionContInstance extends KsContinuation {
+    private LinkedList<Pair<KsNode, KsListNode>> pendingPairs;
+    private KsListNode currentBranchBlock;
+    private KsListNode fallbackBlock = KsListNode.NIL;
     private boolean needExecFallback = false;
-    public ConditionContInstance(Continuation currentCont, KsonListNode expr) {
+    public ConditionContInstance(KsContinuation currentCont, KsListNode expr) {
         super(currentCont);
         pendingPairs = new LinkedList<>();
-        KsonListNode conditionsIter = expr.getNext();
-        while (conditionsIter != KsonListNode.NIL) {
-            KsonNode pairNode = conditionsIter.getValue();
-            if (!(pairNode instanceof KsonListNode)) {
+        KsListNode conditionsIter = expr.getNext();
+        while (conditionsIter != KsListNode.NIL) {
+            KsNode pairNode = conditionsIter.getValue();
+            if (!(pairNode instanceof KsListNode)) {
                 throw new RuntimeException("condition pair should be a list");
             }
-            KsonListNode pair = pairNode.asListNode();
-            KsonNode condExpr = pair.getValue();
+            KsListNode pair = pairNode.asListNode();
+            KsNode condExpr = pair.getValue();
             if (condExpr.isWord("else")) {
                 fallbackBlock = pair.getNext();
                 if (!fallbackBlock.isListNode()) {
@@ -37,7 +38,7 @@ public class ConditionContInstance extends Continuation {
                 break;
             }
 
-            KsonListNode condBlock = pair.getNext();
+            KsListNode condBlock = pair.getNext();
             if (!condBlock.isListNode()) {
                 throw new RuntimeException("condition block should not be empty");
             }
@@ -47,7 +48,7 @@ public class ConditionContInstance extends Continuation {
 
     }
 
-    public ContRunResult initNextRun(ExecState state, KsonNode lastValue, KsonNode currentNodeToRun) {
+    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         if (pendingPairs.size() == 0) {
             if (needExecFallback) {
                 needExecFallback = false;
@@ -62,8 +63,8 @@ public class ConditionContInstance extends Continuation {
                         .build();
             }
         } else {
-            Pair<KsonNode, KsonListNode> condPair = pendingPairs.pollFirst();
-            KsonNode nextToRun = condPair.getLeft();
+            Pair<KsNode, KsListNode> condPair = pendingPairs.pollFirst();
+            KsNode nextToRun = condPair.getLeft();
             currentBranchBlock = condPair.getRight();
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
             return nextCont.initNextRun(state, lastValue, nextToRun);
@@ -71,7 +72,7 @@ public class ConditionContInstance extends Continuation {
     }
 
     @Override
-    public ContRunResult run(ExecState state, KsonNode lastValue, KsonNode currentNodeToRun) {
+    public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         boolean lastCondExprResult = lastValue.toBoolean();
         if (lastCondExprResult) {
             BlockContInstance nextCont = new BlockContInstance(getNext(), currentBranchBlock);

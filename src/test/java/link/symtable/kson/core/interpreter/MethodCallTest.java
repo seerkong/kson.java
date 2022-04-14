@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import link.symtable.kson.core.Kson;
 import link.symtable.kson.core.interpreter.oopsupport.SupportMethodCall;
-import link.symtable.kson.core.node.KsonArray;
-import link.symtable.kson.core.node.KsonHostObject;
-import link.symtable.kson.core.node.KsonNode;
-import link.symtable.kson.core.node.KsonString;
+import link.symtable.kson.core.node.KsArray;
+import link.symtable.kson.core.node.KsHostObject;
+import link.symtable.kson.core.node.KsNode;
+import link.symtable.kson.core.node.KsString;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,9 +25,9 @@ public class MethodCallTest {
         private String name = "Alice";
 
         @Override
-        public KsonNode callMethod(ExecState state, String methodName, KsonNode[] args) {
+        public KsNode callMethod(ExecState state, String methodName, KsNode[] args) {
             if ("get_name".equals(methodName)) {
-                return new KsonString(name);
+                return new KsString(name);
             } else {
                 throw new NotImplementedException("methodName " + methodName + " is not supported");
             }
@@ -38,29 +38,29 @@ public class MethodCallTest {
     public void testHostObj() {
         String source =
                 "(. a (get_name)) ";
-        KsonNode node = Kson.parse(source);
+        KsNode node = Kson.parse(source);
 
         A a = new A();
-        KsonHostObject hostObject = new KsonHostObject(a);
+        KsHostObject hostObject = new KsHostObject(a);
         Env env = Env.makeRootEnv();
         env.define("a", hostObject);
         ExecResult r = interp.run(node, new ExecState(), env);
 
         log.info("result {}", r.getData());
-        Assertions.assertTrue(r.getData().equals(new KsonString(a.name)));
+        Assertions.assertTrue(r.getData().equals(new KsString(a.name)));
     }
 
     @Test
     public void testMapMethods() {
         String source =
                 "(. {m:2} (put \"a\" 1) (keys))";
-        KsonNode node = Kson.parse(source);
+        KsNode node = Kson.parse(source);
 
         ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());
-        List<KsonNode> keys = new ArrayList<>();
-        keys.add(new KsonString("m"));
-        keys.add(new KsonString("a"));
+        List<KsNode> keys = new ArrayList<>();
+        keys.add(new KsString("m"));
+        keys.add(new KsString("a"));
         log.info("result {}", r.getData());
-        Assertions.assertTrue(r.getData().equals(new KsonArray(keys)));
+        Assertions.assertTrue(r.getData().equals(new KsArray(keys)));
     }
 }

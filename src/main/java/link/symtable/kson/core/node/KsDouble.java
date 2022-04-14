@@ -5,10 +5,10 @@ import java.util.Objects;
 import lombok.Getter;
 
 @Getter
-public class KsonDouble extends KsonNumber {
+public class KsDouble extends KsNumber {
     private double value;
 
-    public KsonDouble(double value) {
+    public KsDouble(double value) {
         this.value = value;
     }
 
@@ -29,10 +29,10 @@ public class KsonDouble extends KsonNumber {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof KsonDouble)) {
+        if (!(obj instanceof KsDouble)) {
             return false;
         }
-        KsonDouble other = (KsonDouble) obj;
+        KsDouble other = (KsDouble) obj;
         return Objects.equals(this.value, other.toPlainObject());
     }
 
@@ -43,7 +43,7 @@ public class KsonDouble extends KsonNumber {
     public boolean isDouble() {
         return true;
     }
-    public KsonDouble asDouble() {
+    public KsDouble asDouble() {
         return this;
     }
 }

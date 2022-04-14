@@ -7,57 +7,78 @@ import link.symtable.kson.core.interpreter.ContRunResult;
 import link.symtable.kson.core.interpreter.Env;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
-import link.symtable.kson.core.node.KsonHostSyncFunction;
-import link.symtable.kson.core.node.KsonLambdaFunction;
-import link.symtable.kson.core.node.KsonListNode;
-import link.symtable.kson.core.node.KsonNode;
+import link.symtable.kson.core.node.KsContinuation;
+import link.symtable.kson.core.node.KsFunction;
+import link.symtable.kson.core.node.KsHostSyncFunction;
+import link.symtable.kson.core.node.KsLambdaFunction;
+import link.symtable.kson.core.node.KsListNode;
+import link.symtable.kson.core.node.KsNode;
 
-public class FuncCallContInstance extends Continuation {
-    private LinkedList<KsonNode> pendingNodes;
-    private LinkedList<KsonNode> evaledNodes;
+public class FuncCallContInstance extends KsContinuation {
+    private LinkedList<KsNode> pendingNodes = new LinkedList<>();;
+    private LinkedList<KsNode> evaledNodes = new LinkedList<>();;
 
-    public FuncCallContInstance(Continuation currentCont, KsonListNode nodeToRun) {
+    public FuncCallContInstance(KsContinuation currentCont, KsListNode nodeToRun) {
         super(currentCont);
-        pendingNodes = new LinkedList<>();
-
-        KsonListNode iter = nodeToRun;
-        while (iter != KsonListNode.NIL) {
+        KsListNode iter = nodeToRun;
+        while (iter != KsListNode.NIL) {
             pendingNodes.add(iter.getValue());
             iter = iter.getNext();
         }
-        evaledNodes = new LinkedList<>();
     }
 
-    public ContRunResult initNextRun(ExecState state, KsonNode lastValue, KsonNode currentNodeToRun) {
+    // 直接初始化为参数已计算完毕
+    public FuncCallContInstance(KsContinuation currentCont, KsFunction func, KsListNode evaledArgs) {
+        super(currentCont);
+        evaledNodes.add(func);
+        KsListNode iter = evaledArgs;
+        while (iter != KsListNode.NIL) {
+            evaledNodes.add(iter.getValue());
+            iter = iter.getNext();
+        }
+    }
+
+    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         if (pendingNodes.size() == 0) {
             if (evaledNodes.size() == 0) {
                 throw new RuntimeException("cannot eval empty expr");
             }
-            KsonNode funcNode = evaledNodes.pollFirst();
-            KsonNode[] args = evaledNodes.toArray(new KsonNode[evaledNodes.size()]);
-            if (funcNode instanceof KsonHostSyncFunction) {
-                KsonNode applyResult = ((KsonHostSyncFunction) funcNode).apply(state, args);
+            KsNode funcNode = evaledNodes.pollFirst();
+            KsNode[] args = evaledNodes.toArray(new KsNode[evaledNodes.size()]);
+            if (funcNode instanceof KsHostSyncFunction) {
+                KsNode applyResult = ((KsHostSyncFunction) funcNode).apply(state, args);
                 return ContRunResult.builder()
                         .nextAction(ExecAction.RUN_CONT)
                         .nextCont(getNext())
                         .nextNodeToRun(currentNodeToRun)
                         .newLastValue(applyResult)
                         .build();
+            } else if (funcNode instanceof KsContinuation) {
+                // cont的参数计算完毕，可以恢复现场了
+                KsNode newLastValToResumeCont = args[0];
+                return ContRunResult.builder()
+                        .nextAction(ExecAction.RUN_CONT)
+                        .nextCont((KsContinuation) funcNode)
+                        .nextNodeToRun(currentNodeToRun)
+                        .newLastValue(newLastValToResumeCont)
+                        .build();
             } else {
-                KsonLambdaFunction func = (KsonLambdaFunction) funcNode;
+                KsLambdaFunction func = (KsLambdaFunction) funcNode;
                 // bind args
                 Env childEnv = Env.makeChildEnv(getEnv());
                 List<String> funcArgs = func.getParamNames();
                 for (int i = 0; i < funcArgs.size(); i++) {
                     String paramName = funcArgs.get(i);
-                    KsonNode arg = args[i];
+                    KsNode arg = args[i];
                     childEnv.define(paramName, arg);
                 }
+                // 创建buildin的 continuation变量
+                childEnv.define("return", getNext());
                 BlockContInstance nextCont = new BlockContInstance(getNext(), func.getBlock(), childEnv);
                 return nextCont.initNextRun(state, lastValue, func.getBlock());
             }
         } else {
-            KsonNode nextToRun = pendingNodes.pollFirst();
+            KsNode nextToRun = pendingNodes.pollFirst();
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
             return ContRunResult.builder()
                     .nextAction(ExecAction.RUN_CONT)
@@ -69,7 +90,7 @@ public class FuncCallContInstance extends Continuation {
     }
 
     @Override
-    public ContRunResult run(ExecState state, KsonNode lastValue, KsonNode currentNodeToRun) {
+    public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         evaledNodes.add(lastValue);
         return initNextRun(state, lastValue, currentNodeToRun);
     }

@@ -13,34 +13,34 @@ import link.symtable.kson.core.interpreter.ExecState;
 import lombok.Getter;
 
 @Getter
-public class KsonListNode extends KsonContainerNode {
-    public static KsonListNode NIL = null;
+public class KsListNode extends KsContainerNode {
+    public static KsListNode NIL = null;
 
-    private KsonNode value;
-    private KsonListNode next = null;
+    private KsNode value;
+    private KsListNode next = null;
 
-    private KsonListNode() {
+    private KsListNode() {
 
     }
 
-    public KsonListNode(KsonNode value) {
+    public KsListNode(KsNode value) {
         this(value, null);
     }
 
-    public KsonListNode(KsonNode value, KsonListNode next) {
+    public KsListNode(KsNode value, KsListNode next) {
         this.value = value;
         this.next = next;
     }
 
-    public static KsonListNode makeByArray(KsonNode[] children) {
-        return makeByList(new ArrayList<KsonNode>(Arrays.asList(children)));
+    public static KsListNode makeByArray(KsNode[] children) {
+        return makeByList(new ArrayList<KsNode>(Arrays.asList(children)));
     }
 
-    public static KsonListNode makeByList(List<KsonNode> children) {
-        KsonListNode result = null;
+    public static KsListNode makeByList(List<KsNode> children) {
+        KsListNode result = null;
         for (int i = children.size() - 1; i >= 0; i--) {
-            KsonNode v = children.get(i);
-            KsonListNode node = new KsonListNode(v, result);
+            KsNode v = children.get(i);
+            KsListNode node = new KsListNode(v, result);
             result = node;
         }
 
@@ -52,9 +52,9 @@ public class KsonListNode extends KsonContainerNode {
     }
 
     public String toString() {
-        List<KsonNode> chidlren = new ArrayList<>();
-        KsonListNode iter = this;
-        while (iter != KsonListNode.NIL) {
+        List<KsNode> chidlren = new ArrayList<>();
+        KsListNode iter = this;
+        while (iter != KsListNode.NIL) {
             chidlren.add(iter.getValue());
             iter = iter.getNext();
         }
@@ -66,10 +66,10 @@ public class KsonListNode extends KsonContainerNode {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof KsonListNode)) {
+        if (!(obj instanceof KsListNode)) {
             return false;
         }
-        KsonListNode other = (KsonListNode) obj;
+        KsListNode other = (KsListNode) obj;
         if (!Objects.equals(this.value, other.getValue())) {
             return false;
         }
@@ -93,11 +93,11 @@ public class KsonListNode extends KsonContainerNode {
     public boolean isListNode() {
         return true;
     }
-    public KsonListNode asListNode() {
+    public KsListNode asListNode() {
         return this;
     }
 
-    public KsonNode subscriptByString(ExecState state, String fieldName) {
+    public KsNode subscriptByString(ExecState state, String fieldName) {
         if ("value".equals(fieldName)) {
             return value;
         } else if ("next".equals(fieldName)) {
@@ -107,19 +107,19 @@ public class KsonListNode extends KsonContainerNode {
         }
     }
 
-    public KsonNode getNextValue() {
+    public KsNode getNextValue() {
         return getNext().getValue();
     }
 
-    public KsonListNode getNextNext() {
+    public KsListNode getNextNext() {
         return getNext().getNext();
     }
 
-    public KsonNode getNextNextValue() {
+    public KsNode getNextNextValue() {
         return getNextNext().getValue();
     }
 
-    public KsonListNode getNextNextNext() {
+    public KsListNode getNextNextNext() {
         return getNextNext().getNext();
     }
 }

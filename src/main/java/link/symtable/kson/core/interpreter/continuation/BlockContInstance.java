@@ -6,28 +6,29 @@ import link.symtable.kson.core.interpreter.ContRunResult;
 import link.symtable.kson.core.interpreter.Env;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
-import link.symtable.kson.core.node.KsonListNode;
-import link.symtable.kson.core.node.KsonNode;
+import link.symtable.kson.core.node.KsContinuation;
+import link.symtable.kson.core.node.KsListNode;
+import link.symtable.kson.core.node.KsNode;
 
-public class BlockContInstance extends Continuation {
-    private LinkedList<KsonNode> pendingNodes;
+public class BlockContInstance extends KsContinuation {
+    private LinkedList<KsNode> pendingNodes;
 
-    public BlockContInstance(Continuation nextCont, KsonListNode nodeToRun) {
+    public BlockContInstance(KsContinuation nextCont, KsListNode nodeToRun) {
         this(nextCont, nodeToRun, nextCont.getEnv());
     }
 
-    public BlockContInstance(Continuation nextCont, KsonListNode nodeToRun, Env env) {
+    public BlockContInstance(KsContinuation nextCont, KsListNode nodeToRun, Env env) {
         super(nextCont, env);
         pendingNodes = new LinkedList<>();
 
-        KsonListNode iter = nodeToRun;
-        while (iter != KsonListNode.NIL) {
+        KsListNode iter = nodeToRun;
+        while (iter != KsListNode.NIL) {
             pendingNodes.add(iter.getValue());
             iter = iter.getNext();
         }
     }
 
-    public ContRunResult initNextRun(ExecState state, KsonNode lastValue, KsonNode currentNodeToRun) {
+    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         if (pendingNodes.size() == 0) {
             return ContRunResult.builder()
                     .nextAction(ExecAction.RUN_CONT)
@@ -36,14 +37,14 @@ public class BlockContInstance extends Continuation {
                     .newLastValue(lastValue)
                     .build();
         } else {
-            KsonNode nextToRun = pendingNodes.pollFirst();
+            KsNode nextToRun = pendingNodes.pollFirst();
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
             return nextCont.initNextRun(state, lastValue, nextToRun);
         }
     }
 
     @Override
-    public ContRunResult run(ExecState state, KsonNode lastValue, KsonNode currentNodeToRun) {
+    public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         return initNextRun(state, lastValue, currentNodeToRun);
     }
 }

@@ -3,12 +3,12 @@ package link.symtable.kson.core.node;
 import lombok.Getter;
 
 @Getter
-public class KsonBoolean extends KsonValueNode {
-    public static KsonBoolean TRUE = new KsonBoolean(true);
-    public static KsonBoolean FALSE = new KsonBoolean(false);
+public class KsBoolean extends KsValueNode {
+    public static KsBoolean TRUE = new KsBoolean(true);
+    public static KsBoolean FALSE = new KsBoolean(false);
     private boolean value;
 
-    public KsonBoolean(boolean value) {
+    public KsBoolean(boolean value) {
         this.value = value;
     }
 
@@ -25,10 +25,10 @@ public class KsonBoolean extends KsonValueNode {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof KsonBoolean)) {
+        if (!(obj instanceof KsBoolean)) {
             return false;
         }
-        KsonBoolean other = (KsonBoolean) obj;
+        KsBoolean other = (KsBoolean) obj;
         return value == other.getValue();
     }
 
@@ -44,7 +44,7 @@ public class KsonBoolean extends KsonValueNode {
         return true;
     }
 
-    public KsonBoolean asBoolean() {
+    public KsBoolean asBoolean() {
         return this;
     }
 }

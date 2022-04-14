@@ -14,19 +14,19 @@ import link.symtable.kson.core.interpreter.oopsupport.SupportMethodCall;
 import lombok.Getter;
 
 @Getter
-public class KsonArray extends KsonContainerNode implements SupportMethodCall {
-    private List<KsonNode> value;
+public class KsArray extends KsContainerNode implements SupportMethodCall {
+    private List<KsNode> value;
 
-    public KsonArray() {
+    public KsArray() {
         value = new ArrayList<>();
     }
 
-    public KsonArray(List<KsonNode> value) {
+    public KsArray(List<KsNode> value) {
         this.value = value;
     }
 
-    public KsonArray(KsonNode[] children) {
-        this(new ArrayList<KsonNode>(Arrays.asList(children)));
+    public KsArray(KsNode[] children) {
+        this(new ArrayList<KsNode>(Arrays.asList(children)));
     }
 
     public String toString() {
@@ -39,18 +39,18 @@ public class KsonArray extends KsonContainerNode implements SupportMethodCall {
 
     public Object toPlainObject() {
         List<Object> result = new ArrayList<>();
-        for (KsonNode ksonNode : value) {
-            Object itemPrimaryObj = ksonNode.toPlainObject();
+        for (KsNode ksNode : value) {
+            Object itemPrimaryObj = ksNode.toPlainObject();
             result.add(itemPrimaryObj);
         }
         return result;
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof KsonArray)) {
+        if (!(obj instanceof KsArray)) {
             return false;
         }
-        KsonArray other = (KsonArray) obj;
+        KsArray other = (KsArray) obj;
         if (value.size() != other.value.size()) {
             return false;
         }
@@ -70,11 +70,11 @@ public class KsonArray extends KsonContainerNode implements SupportMethodCall {
         return num;
     }
 
-    public KsonNode get(int index) {
+    public KsNode get(int index) {
         return value.get(index);
     }
 
-    public List<KsonNode> getItems() {
+    public List<KsNode> getItems() {
         return value;
     }
 
@@ -85,12 +85,12 @@ public class KsonArray extends KsonContainerNode implements SupportMethodCall {
     public boolean isArray() {
         return true;
     }
-    public KsonArray asArray() {
+    public KsArray asArray() {
         return this;
     }
 
     @Override
-    public KsonNode subscriptByIndex(ExecState state, int index) {
+    public KsNode subscriptByIndex(ExecState state, int index) {
         if (index > (value.size() - 1)) {
             throw new RuntimeException("array out of index " + index);
         }
@@ -98,7 +98,7 @@ public class KsonArray extends KsonContainerNode implements SupportMethodCall {
     }
 
     @Override
-    public KsonNode callMethod(ExecState state, String methodName, KsonNode[] args) {
+    public KsNode callMethod(ExecState state, String methodName, KsNode[] args) {
         if ("append".equals(methodName)) {
             for (int i = 0; i < args.length; i++) {
                 value.add(args[i]);

@@ -4,20 +4,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
+import link.symtable.kson.core.interpreter.continuation.AndContInstance;
 import link.symtable.kson.core.interpreter.continuation.BlockContInstance;
+import link.symtable.kson.core.interpreter.continuation.CallccContInstance;
 import link.symtable.kson.core.interpreter.continuation.ConditionContInstance;
-import link.symtable.kson.core.interpreter.continuation.Continuation;
+import link.symtable.kson.core.node.KsContinuation;
 import link.symtable.kson.core.interpreter.continuation.FuncDeclareContInstance;
 import link.symtable.kson.core.interpreter.continuation.LetContInstance;
 import link.symtable.kson.core.interpreter.continuation.MethodCallContInstance;
+import link.symtable.kson.core.interpreter.continuation.OrContInstance;
 import link.symtable.kson.core.interpreter.continuation.QuoteContInstance;
 import link.symtable.kson.core.interpreter.continuation.SetContInstance;
 import link.symtable.kson.core.interpreter.continuation.SubscriptContInstance;
-import link.symtable.kson.core.node.KsonListNode;
+import link.symtable.kson.core.node.KsListNode;
 
 
 public class Registry {
-    public static Map<String, BiFunction<Continuation, KsonListNode, Continuation>> keywords = new HashMap<>();
+    public static Map<String, BiFunction<KsContinuation, KsListNode, KsContinuation>> keywords = new HashMap<>();
 
     static {
         keywords.put("let", LetContInstance::new);
@@ -28,5 +31,8 @@ public class Registry {
         keywords.put("@", SubscriptContInstance::new);
         keywords.put(".", MethodCallContInstance::new);
         keywords.put("%", QuoteContInstance::new);
+        keywords.put("and", AndContInstance::new);
+        keywords.put("or", OrContInstance::new);
+        keywords.put("call_cc", CallccContInstance::new);
     }
 }

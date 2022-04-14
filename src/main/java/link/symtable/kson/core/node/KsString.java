@@ -5,10 +5,10 @@ import link.symtable.kson.core.util.StringEscapeHelper;
 import lombok.Getter;
 
 @Getter
-public class KsonString extends KsonValueNode {
+public class KsString extends KsValueNode {
     private String value;
 
-    public KsonString(String value) {
+    public KsString(String value) {
         this.value = value;
     }
 
@@ -21,10 +21,10 @@ public class KsonString extends KsonValueNode {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof KsonString)) {
+        if (!(obj instanceof KsString)) {
             return false;
         }
-        KsonString other = (KsonString) obj;
+        KsString other = (KsString) obj;
         return value.equals(other.value);
     }
 
@@ -39,7 +39,7 @@ public class KsonString extends KsonValueNode {
     public boolean isString() {
         return true;
     }
-    public KsonString asString() {
+    public KsString asString() {
         return this;
     }
 }

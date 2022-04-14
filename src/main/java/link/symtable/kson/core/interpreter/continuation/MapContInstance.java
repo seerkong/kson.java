@@ -11,28 +11,29 @@ import org.apache.commons.lang3.tuple.Pair;
 import link.symtable.kson.core.interpreter.ContRunResult;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
-import link.symtable.kson.core.node.KsonMap;
-import link.symtable.kson.core.node.KsonNode;
+import link.symtable.kson.core.node.KsContinuation;
+import link.symtable.kson.core.node.KsMap;
+import link.symtable.kson.core.node.KsNode;
 
-public class MapContInstance extends Continuation {
-    private LinkedList<Pair<String, KsonNode>> pendingPairs;
-    private Pair<String, KsonNode> currentPair;
-    private List<Pair<String, KsonNode>> evaledPairs;
-    public MapContInstance(Continuation currentCont, KsonMap nodeToRun) {
+public class MapContInstance extends KsContinuation {
+    private LinkedList<Pair<String, KsNode>> pendingPairs;
+    private Pair<String, KsNode> currentPair;
+    private List<Pair<String, KsNode>> evaledPairs;
+    public MapContInstance(KsContinuation currentCont, KsMap nodeToRun) {
         super(currentCont);
         pendingPairs = new LinkedList<>();
         evaledPairs = new ArrayList<>();
-        Map<String, KsonNode> map = nodeToRun.getValue();
+        Map<String, KsNode> map = nodeToRun.getValue();
 
-        for (Map.Entry<String, KsonNode> entry : map.entrySet()) {
+        for (Map.Entry<String, KsNode> entry : map.entrySet()) {
             pendingPairs.push(new ImmutablePair<>(entry.getKey(), entry.getValue()));
         }
 
     }
 
-    public ContRunResult initNextRun(ExecState state, KsonNode lastValue, KsonNode currentNodeToRun) {
+    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         if (pendingPairs.size() == 0) {
-            KsonMap map = new KsonMap(evaledPairs);
+            KsMap map = new KsMap(evaledPairs);
             return ContRunResult.builder()
                     .nextAction(ExecAction.RUN_CONT)
                     .nextCont(getNext())
@@ -41,14 +42,14 @@ public class MapContInstance extends Continuation {
                     .build();
         } else {
             currentPair = pendingPairs.pollFirst();
-            KsonNode nextToRun = currentPair.getValue();
+            KsNode nextToRun = currentPair.getValue();
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
             return nextCont.initNextRun(state, lastValue, nextToRun);
         }
     }
 
     @Override
-    public ContRunResult run(ExecState state, KsonNode lastValue, KsonNode currentNodeToRun) {
+    public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         evaledPairs.add(new ImmutablePair<>(currentPair.getKey(), lastValue));
         return initNextRun(state, lastValue, currentNodeToRun);
     }

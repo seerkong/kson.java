@@ -3,27 +3,28 @@ package link.symtable.kson.core.interpreter.continuation;
 import link.symtable.kson.core.interpreter.ContRunResult;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
-import link.symtable.kson.core.node.KsonListNode;
-import link.symtable.kson.core.node.KsonNode;
-import link.symtable.kson.core.node.KsonNull;
+import link.symtable.kson.core.node.KsContinuation;
+import link.symtable.kson.core.node.KsListNode;
+import link.symtable.kson.core.node.KsNode;
+import link.symtable.kson.core.node.KsNull;
 
-public class LetContInstance extends Continuation {
+public class LetContInstance extends KsContinuation {
     private String varName;
-    private KsonNode varValueExpr = KsonNull.NULL;
-    public LetContInstance(Continuation currentCont, KsonListNode expr) {
+    private KsNode varValueExpr = KsNull.NULL;
+    public LetContInstance(KsContinuation currentCont, KsListNode expr) {
         super(currentCont);
-        if (expr.getNext() == KsonListNode.NIL) {
+        if (expr.getNext() == KsListNode.NIL) {
             throw new RuntimeException("illegal let expr");
         }
-        KsonNode varNameNode = expr.getNext().getValue();
+        KsNode varNameNode = expr.getNext().getValue();
         varName = varNameNode.asWord().getValue();
-        if (expr.getNext().getNext() != KsonListNode.NIL) {
+        if (expr.getNext().getNext() != KsListNode.NIL) {
             varValueExpr = expr.getNext().getNext().getValue();
         }
     }
 
-    public ContRunResult initNextRun(ExecState state, KsonNode lastValue, KsonNode currentNodeToRun) {
-        if (varValueExpr.equals(KsonNull.NULL)) {
+    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+        if (varValueExpr.equals(KsNull.NULL)) {
             getEnv().define(varName, varValueExpr);
             return ContRunResult.builder()
                     .nextAction(ExecAction.RUN_CONT)
@@ -32,14 +33,14 @@ public class LetContInstance extends Continuation {
                     .newLastValue(lastValue)
                     .build();
         } else {
-            KsonNode nextToRun = varValueExpr;
+            KsNode nextToRun = varValueExpr;
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
             return nextCont.initNextRun(state, lastValue, nextToRun);
         }
     }
 
     @Override
-    public ContRunResult run(ExecState state, KsonNode lastValue, KsonNode currentNodeToRun) {
+    public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         getEnv().define(varName, lastValue);
         return ContRunResult.builder()
                 .nextAction(ExecAction.RUN_CONT)

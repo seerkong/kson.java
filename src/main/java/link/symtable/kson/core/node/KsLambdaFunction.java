@@ -6,15 +6,15 @@ import java.util.List;
 import lombok.Getter;
 
 @Getter
-public class KsonLambdaFunction extends KsonFunction {
+public class KsLambdaFunction extends KsFunction {
     private List<String> paramNames = new ArrayList<>();
-    private KsonListNode block;
+    private KsListNode block;
 
-    public KsonLambdaFunction(String name, KsonListNode args, KsonListNode block) {
+    public KsLambdaFunction(String name, KsListNode args, KsListNode block) {
         this.name = name;
 
-        KsonListNode iter = args;
-        while (iter != KsonListNode.NIL) {
+        KsListNode iter = args;
+        while (iter != KsListNode.NIL) {
             paramNames.add(iter.getValue().asWord().getValue());
             iter = iter.getNext();
         }
@@ -23,5 +23,12 @@ public class KsonLambdaFunction extends KsonFunction {
         // TODO 变长参数支持
         this.requiredArgsCount = paramNames.size();
         this.hasVariableArgs = false;
+    }
+
+    public boolean isFunction() {
+        return true;
+    }
+    public KsFunction asFunction() {
+        return this;
     }
 }

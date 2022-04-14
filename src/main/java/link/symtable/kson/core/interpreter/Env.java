@@ -3,13 +3,13 @@ package link.symtable.kson.core.interpreter;
 import java.util.HashMap;
 import java.util.Map;
 
-import link.symtable.kson.core.node.KsonNode;
-import link.symtable.kson.core.node.KsonUndefined;
+import link.symtable.kson.core.node.KsNode;
+import link.symtable.kson.core.node.KsUndefined;
 import link.symtable.kson.core.util.VariableNotDefinedException;
 
 public class Env {
     public Env parent;
-    public Map<String, KsonNode> bindings = new HashMap<>();
+    public Map<String, KsNode> bindings = new HashMap<>();
 
     public Env() {
     }
@@ -26,16 +26,16 @@ public class Env {
         return result;
     }
 
-    public void define(String key, KsonNode value) {
+    public void define(String key, KsNode value) {
         bindings.put(key, value);
     }
 
-    public KsonNode lookup(String key) {
+    public KsNode lookup(String key) {
         if (bindings.containsKey(key)) {
             return bindings.get(key);
         }
         else if (parent == null) {
-            return KsonUndefined.UNDEFINED;
+            return KsUndefined.UNDEFINED;
         }
         else {
             return parent.lookup(key);
@@ -53,7 +53,7 @@ public class Env {
         throw new VariableNotDefinedException();
     }
 
-    public static boolean isLookupFailedResult(KsonNode valInEnv) {
-        return (valInEnv == null || valInEnv == KsonUndefined.UNDEFINED);
+    public static boolean isLookupFailedResult(KsNode valInEnv) {
+        return (valInEnv == null || valInEnv == KsUndefined.UNDEFINED);
     }
 }

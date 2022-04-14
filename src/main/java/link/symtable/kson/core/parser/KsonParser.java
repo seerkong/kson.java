@@ -13,18 +13,18 @@ import link.symtable.kson.core.lexer.KsonLexer;
 import link.symtable.kson.core.lexer.Token;
 import link.symtable.kson.core.lexer.TokenStream;
 import link.symtable.kson.core.lexer.TokenType;
-import link.symtable.kson.core.node.KsonArray;
-import link.symtable.kson.core.node.KsonBoolean;
-import link.symtable.kson.core.node.KsonDouble;
-import link.symtable.kson.core.node.KsonInt64;
-import link.symtable.kson.core.node.KsonListNode;
-import link.symtable.kson.core.node.KsonMap;
-import link.symtable.kson.core.node.KsonNode;
-import link.symtable.kson.core.node.KsonNull;
-import link.symtable.kson.core.node.KsonNumber;
-import link.symtable.kson.core.node.KsonString;
-import link.symtable.kson.core.node.KsonSymbol;
-import link.symtable.kson.core.node.KsonWord;
+import link.symtable.kson.core.node.KsArray;
+import link.symtable.kson.core.node.KsBoolean;
+import link.symtable.kson.core.node.KsDouble;
+import link.symtable.kson.core.node.KsInt64;
+import link.symtable.kson.core.node.KsListNode;
+import link.symtable.kson.core.node.KsMap;
+import link.symtable.kson.core.node.KsNode;
+import link.symtable.kson.core.node.KsNull;
+import link.symtable.kson.core.node.KsNumber;
+import link.symtable.kson.core.node.KsString;
+import link.symtable.kson.core.node.KsSymbol;
+import link.symtable.kson.core.node.KsWord;
 import link.symtable.kson.core.util.LexException;
 import link.symtable.kson.core.util.ParseException;
 
@@ -32,33 +32,33 @@ import link.symtable.kson.core.util.ParseException;
 public class KsonParser {
     private static Pattern EmptyReg = Pattern.compile("^\\s*$");
 
-    public static KsonNode parse(String input) throws LexException, ParseException {
+    public static KsNode parse(String input) throws LexException, ParseException {
         Matcher matcher = EmptyReg.matcher(input);
         if (matcher.find()) {
-            return KsonNull.NULL;
+            return KsNull.NULL;
         }
         return parse(KsonLexer.lex(input));
     }
 
-    public static KsonNode parse(List<Token> input) throws ParseException {
+    public static KsNode parse(List<Token> input) throws ParseException {
         return parseValue(new TokenStream(input));
     }
 
-    public static KsonNode parseValue(TokenStream s) throws ParseException {
+    public static KsNode parseValue(TokenStream s) throws ParseException {
         s.skipBlankTokens();
         Token currentToken = s.current();
         switch (currentToken.getType()) {
             case BeginMap:
                 return parseContainer(s, TokenType.BeginMap, TokenType.EndMap, TokenType.ElementSeperator,
                         KsonParser::parsePair,
-                        children -> new KsonMap(children));
+                        children -> new KsMap(children));
             case BeginArray:
                 return parseContainer(s, TokenType.BeginArray, TokenType.EndArray, TokenType.ElementSeperator,
                         KsonParser::parseValue,
-                        children -> new KsonArray(children));
+                        children -> new KsArray(children));
             case BeginList:
                 return parseListContainer(s, TokenType.BeginList, TokenType.EndList, KsonParser::parseValue,
-                        children -> KsonListNode.makeByList(children));
+                        children -> KsListNode.makeByList(children));
             case Number:
                 return parseNumber(s);
             case String:
@@ -88,38 +88,38 @@ public class KsonParser {
         return parseChars(new CharStream(charList));
     }
 
-    public static KsonString parseString(TokenStream s) throws ParseException {
-        return new KsonString(parseLiteralString(s));
+    public static KsString parseString(TokenStream s) throws ParseException {
+        return new KsString(parseLiteralString(s));
     }
 
-    public static KsonWord parseWord(TokenStream s) throws ParseException {
+    public static KsWord parseWord(TokenStream s) throws ParseException {
         Token t = s.consume(TokenType.Word);
-        return new KsonWord(t.getValue());
+        return new KsWord(t.getValue());
     }
 
-    public static KsonSymbol parseSymbol(TokenStream s) throws ParseException {
+    public static KsSymbol parseSymbol(TokenStream s) throws ParseException {
         Token t = s.consume(TokenType.Symbol);
-        return new KsonSymbol(t.getValue().substring(1));
+        return new KsSymbol(t.getValue().substring(1));
     }
 
-    public static KsonNumber parseNumber(TokenStream s) throws ParseException {
+    public static KsNumber parseNumber(TokenStream s) throws ParseException {
         Token nextToken = s.consumeTypeAndSkipBlankTokens(TokenType.Number);
         if (nextToken.getValue().contains(".") || nextToken.getValue().contains("e") || nextToken.getValue()
                 .contains("E")) {
-            return new KsonDouble(Double.parseDouble(nextToken.getValue()));
+            return new KsDouble(Double.parseDouble(nextToken.getValue()));
         } else {
-            return new KsonInt64(Long.parseLong(nextToken.getValue()));
+            return new KsInt64(Long.parseLong(nextToken.getValue()));
         }
     }
 
-    public static KsonBoolean parseBoolean(TokenStream s) throws ParseException {
+    public static KsBoolean parseBoolean(TokenStream s) throws ParseException {
         Token t = s.consumeTypeAndSkipBlankTokens(TokenType.Boolean);
-        return new KsonBoolean(Boolean.parseBoolean(t.getValue()));
+        return new KsBoolean(Boolean.parseBoolean(t.getValue()));
     }
 
-    public static KsonNull parseNull(TokenStream s) throws ParseException {
+    public static KsNull parseNull(TokenStream s) throws ParseException {
         s.consumeTypeAndSkipBlankTokens(TokenType.Null);
-        return KsonNull.NULL;
+        return KsNull.NULL;
     }
 
     public static <T, C> T parseListContainer(TokenStream s, TokenType begin, TokenType end,
@@ -200,7 +200,7 @@ public class KsonParser {
         }
     }
 
-    public static Pair<String, KsonNode> parsePair(TokenStream s) throws ParseException {
+    public static Pair<String, KsNode> parsePair(TokenStream s) throws ParseException {
         String str;
         s.skipBlankTokens();
         if (s.current().getType() == TokenType.Word) {

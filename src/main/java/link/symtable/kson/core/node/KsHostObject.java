@@ -7,14 +7,14 @@ import lombok.Getter;
 
 
 @Getter
-public class KsonHostObject extends KsonNodeBase implements SupportMethodCall {
+public class KsHostObject extends KsNodeBase implements SupportMethodCall {
     private Object hostObj;
-    public KsonHostObject(Object hostObj) {
+    public KsHostObject(Object hostObj) {
         this.hostObj = hostObj;
     }
 
     @Override
-    public KsonNode callMethod(ExecState state, String methodName, KsonNode[] args) {
+    public KsNode callMethod(ExecState state, String methodName, KsNode[] args) {
         if (hostObj instanceof SupportMethodCall) {
             return ((SupportMethodCall) hostObj).callMethod(state, methodName, args);
         } else {

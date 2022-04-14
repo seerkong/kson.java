@@ -3,15 +3,15 @@ package link.symtable.kson.core.node;
 import lombok.Getter;
 
 @Getter
-public class KsonSymbol extends KsonValueNode {
+public class KsWord extends KsValueNode {
     private String value;
 
-    public KsonSymbol(String value) {
+    public KsWord(String value) {
         this.value = value;
     }
 
     public String toString() {
-        return String.format("$%s", value);
+        return String.format("%s", value);
     }
 
     public Object toPlainObject() {
@@ -19,11 +19,11 @@ public class KsonSymbol extends KsonValueNode {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof KsonWord)) {
+        if (!(obj instanceof KsWord)) {
             return false;
         }
-        KsonWord other = (KsonWord) obj;
-        return value.equals(other.getValue());
+        KsWord other = (KsWord) obj;
+        return value.equals(other.value);
     }
 
     public int hashCode() {
@@ -34,13 +34,14 @@ public class KsonSymbol extends KsonValueNode {
         return num;
     }
 
-    public boolean isSymbol() {
+    public boolean isWord() {
         return true;
     }
-    public boolean isSymbol(String inner) {
+    public boolean isWord(String inner) {
         return value.equals(inner);
     }
-    public KsonSymbol asSymbol() {
+
+    public KsWord asWord() {
         return this;
     }
 }

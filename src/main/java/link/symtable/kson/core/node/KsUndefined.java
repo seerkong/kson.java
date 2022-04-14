@@ -1,7 +1,7 @@
 package link.symtable.kson.core.node;
 
-public class KsonUndefined extends KsonValueNode {
-    public static KsonUndefined UNDEFINED = new KsonUndefined();
+public class KsUndefined extends KsValueNode {
+    public static KsUndefined UNDEFINED = new KsUndefined();
 
     public String toString() {
         return "undefined";
@@ -12,7 +12,7 @@ public class KsonUndefined extends KsonValueNode {
     }
 
     public boolean equals(Object obj) {
-        return obj instanceof KsonUndefined;
+        return obj instanceof KsUndefined;
     }
 
     public int hashCode() {
