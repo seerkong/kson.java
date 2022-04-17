@@ -26,7 +26,7 @@ public class Registry {
         keywords.put("let", LetContInstance::new);
         keywords.put("set", SetContInstance::new);
         keywords.put("cond", ConditionContInstance::new);
-        keywords.put("blk", (nextCont, expr) -> new BlockContInstance(nextCont, expr.getNext()));
+        keywords.put("begin", (nextCont, expr) -> new BlockContInstance(nextCont, expr.getNext()));
         keywords.put("func", FuncDeclareContInstance::new);
         keywords.put("@", SubscriptContInstance::new);
         keywords.put(".", MethodCallContInstance::new);

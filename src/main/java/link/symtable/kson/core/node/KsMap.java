@@ -165,6 +165,10 @@ public class KsMap extends KsContainerNode implements SupportMethodCall, Map {
         return num;
     }
 
+    public boolean subscriptAcceptKey(ExecState state, String fieldName) {
+        return value.containsKey(fieldName);
+    }
+
     public KsNode subscriptByString(ExecState state, String fieldName) {
         if (value.containsKey(fieldName)) {
             return value.get(fieldName);

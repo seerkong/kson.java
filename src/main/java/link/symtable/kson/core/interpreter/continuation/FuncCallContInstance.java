@@ -38,6 +38,13 @@ public class FuncCallContInstance extends KsContinuation {
         }
     }
 
+    // 直接初始化为参数已计算完毕
+    public FuncCallContInstance(KsContinuation currentCont, KsFunction func, List<KsNode> evaledArgs) {
+        super(currentCont);
+        evaledNodes.add(func);
+        evaledNodes.addAll(evaledArgs);
+    }
+
     public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         if (pendingNodes.size() == 0) {
             if (evaledNodes.size() == 0) {

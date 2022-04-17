@@ -11,8 +11,10 @@ import link.symtable.kson.core.interpreter.ContRunResult;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.interpreter.oopsupport.SupportMethodCall;
+import link.symtable.kson.core.interpreter.oopsupport.SupportSubscript;
 import link.symtable.kson.core.node.KsArray;
 import link.symtable.kson.core.node.KsContinuation;
+import link.symtable.kson.core.node.KsFunction;
 import link.symtable.kson.core.node.KsListNode;
 import link.symtable.kson.core.node.KsNode;
 
@@ -21,10 +23,10 @@ public class MethodCallContInstance extends KsContinuation {
     private KsNode targetEvaled = null;
 
     private LinkedList<Pair<String, KsArray>> pendingMethodAndArgsPairs = new LinkedList<>();
-    ;
-    private Pair<String, KsArray> currentMethodAndArgsPairs;
+    private Pair<String, KsArray> currentEvalArgsTask;
     private LinkedList<Pair<String, KsArray>> evaledMethodAndArgsPairs = new LinkedList<>();
-    ;
+    private Pair<String, KsArray> currentApplyMethodTask;
+
 
     public MethodCallContInstance(KsContinuation currentCont, KsListNode initExpr) {
         super(currentCont);
@@ -53,37 +55,61 @@ public class MethodCallContInstance extends KsContinuation {
         if (targetEvaled == null) {
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
             return nextCont.initNextRun(state, lastValue, targetNode);
-        } else if (pendingMethodAndArgsPairs.size() == 0) {
+        } else if (pendingMethodAndArgsPairs.size() > 0) {
+            currentEvalArgsTask = pendingMethodAndArgsPairs.pollFirst();
+            ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
+            return nextCont.initNextRun(state, lastValue, currentEvalArgsTask.getRight());
+        } else if (evaledMethodAndArgsPairs.size() > 0) {
+            currentApplyMethodTask = evaledMethodAndArgsPairs.pollFirst();
+            String methodName = currentApplyMethodTask.getLeft();
             KsNode targetNode = targetEvaled;
-            while (evaledMethodAndArgsPairs.size() > 0) {
-                Pair<String, KsArray> methodAndArgs = evaledMethodAndArgsPairs.pollFirst();
-                if (!(targetNode instanceof SupportMethodCall)) {
-                    throw new RuntimeException("get subscript not supported");
+            if (targetNode instanceof SupportSubscript && ((SupportSubscript) targetNode).subscriptAcceptKey(state, methodName)) {
+                KsNode fieldValue = ((SupportSubscript) targetNode).subscriptByString(state, methodName);
+                if (fieldValue.isFunction()) {
+                    List<KsNode> args = new ArrayList<>();
+                    args.add(targetNode);
+                    args.addAll(currentApplyMethodTask.getRight().getItems());
+                    FuncCallContInstance newCont = new FuncCallContInstance(getNext(), fieldValue.asFunction(), args);
+                    return newCont.initNextRun(state, lastValue, currentNodeToRun);
+                } else {
+                    throw new RuntimeException("field is not a function, call method not supported");
                 }
-                KsNode[] argsArr = methodAndArgs.getRight().getItems().toArray(new KsNode[0]);
-                targetNode = ((SupportMethodCall) targetNode).callMethod(state, methodAndArgs.getLeft(), argsArr);
+            } else if (targetEvaled instanceof SupportMethodCall) {
+                KsNode[] argsArr = currentApplyMethodTask.getRight().getItems().toArray(new KsNode[0]);
+
+                targetNode = ((SupportMethodCall) targetNode).callMethod(state, methodName, argsArr);
+                return ContRunResult.builder()
+                        .nextAction(ExecAction.RUN_CONT)
+                        .nextCont(this)
+                        .nextNodeToRun(currentNodeToRun)
+                        .newLastValue(targetNode)
+                        .build();
+            } else {
+                throw new RuntimeException("call method not supported");
             }
 
+        } else {
+            // all jobs finished
             return ContRunResult.builder()
                     .nextAction(ExecAction.RUN_CONT)
                     .nextCont(getNext())
                     .nextNodeToRun(currentNodeToRun)
-                    .newLastValue(targetNode)
+                    .newLastValue(targetEvaled)
                     .build();
-        } else {
-            currentMethodAndArgsPairs = pendingMethodAndArgsPairs.pollFirst();
-            ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
-            return nextCont.initNextRun(state, lastValue, currentMethodAndArgsPairs.getRight());
         }
     }
 
     @Override
     public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
-        if (currentMethodAndArgsPairs == null) {
-            // eval method chain first target
+        if (currentEvalArgsTask == null) {
+            // step1 eval first target
             targetEvaled = lastValue;
+        } else if (currentApplyMethodTask == null) {
+            // step2 eval method args
+            evaledMethodAndArgsPairs.add(new ImmutablePair<>(currentEvalArgsTask.getLeft(), lastValue.asArray()));
         } else {
-            evaledMethodAndArgsPairs.add(new ImmutablePair<>(currentMethodAndArgsPairs.getLeft(), lastValue.asArray()));
+            // step3 apply args to method
+            targetEvaled = lastValue;
         }
         return initNextRun(state, lastValue, currentNodeToRun);
     }

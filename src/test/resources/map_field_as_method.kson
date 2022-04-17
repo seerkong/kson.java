@@ -1,0 +1,3 @@
+(. { add2: (func (obj x y) (+ x y)) }
+    (add2 1 2)
+)

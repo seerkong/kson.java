@@ -1,0 +1,12 @@
+(try
+    (begin
+        (write_line "one")
+        (throw $my_runtime_error)
+        (write_line "two")
+    )
+    (catch
+        (func (err)
+            (write_line "error")
+        )
+    )
+)

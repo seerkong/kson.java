@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import link.symtable.kson.core.Kson;
+import link.symtable.kson.core.TestBase;
 import link.symtable.kson.core.node.KsBoolean;
 import link.symtable.kson.core.node.KsInt64;
 import link.symtable.kson.core.node.KsListNode;
@@ -17,7 +18,7 @@ import link.symtable.kson.core.node.KsWord;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class InterpreterTest {
+public class InterpreterTest extends TestBase {
     public static Interpreter interp = new Interpreter();
     @Test
     public void testBooleanNode() {
@@ -78,7 +79,7 @@ public class InterpreterTest {
     @Test
     public void testBlock() {
         String source =
-                "(blk (write_line \"line1\") (write_line \"line2\") (blk (write_line \"nested\")))";
+                "(begin (write_line \"line1\") (write_line \"line2\") (blk (write_line \"nested\")))";
         KsNode node = Kson.parse(source);
 
         ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());
@@ -108,7 +109,7 @@ public class InterpreterTest {
     @Test
     public void testFunc() {
         String source =
-                "(blk (func add3 (x y z) (+ (+ x y) z)) (add3 1 2 3))";
+                "(begin (func add3 (x y z) (+ (+ x y) z)) (add3 1 2 3))";
         KsNode node = Kson.parse(source);
 
         ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());
@@ -175,7 +176,7 @@ public class InterpreterTest {
     @Test
     public void testWithoutCallcc() {
         String source =
-                "(blk (func f (ret) (ret 2) 3 )  (write_line (f (func (x) x)) ) )";
+                "(begin (func f (ret) (ret 2) 3 )  (write_line (f (func (x) x)) ) )";
         KsNode node = Kson.parse(source);
 
         ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());
@@ -186,7 +187,7 @@ public class InterpreterTest {
     @Test
     public void testWithCallcc() {
         String source =
-                "(blk (func f (ret) (ret 2) 3 )  (write_line (call_cc f)) )";
+                "(begin (func f (ret) (ret 2) 3 )  (write_line (call_cc f)) )";
         KsNode node = Kson.parse(source);
 
         ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());
@@ -197,7 +198,7 @@ public class InterpreterTest {
     @Test
     public void testReturn1() {
         String source =
-                "(blk (func f (x) (return 2) x )  (write_line (f 4)) )";
+                "(begin (func f (x) (return 2) x )  (write_line (f 4)) )";
         KsNode node = Kson.parse(source);
 
         ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());
@@ -208,11 +209,21 @@ public class InterpreterTest {
     @Test
     public void testReturn2() {
         String source =
-                "(blk (func f (x) (return (+ 3 5)) x )  (write_line (f 4)) )";
+                "(begin (func f (x) (return (+ 3 5)) x )  (write_line (f 4)) )";
         KsNode node = Kson.parse(source);
 
         ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());
         // should write 8
         log.info("result {}", r.getData());
+    }
+
+    @Test
+    public void mapFieldAsMethod() throws RuntimeException {
+        KsNode node = parseFile("/map_field_as_method.kson");
+        System.out.println(node);
+        ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());
+
+        log.info("result {}", r.getData());
+        Assertions.assertTrue(r.getData().equals(new KsInt64(3)));
     }
 }

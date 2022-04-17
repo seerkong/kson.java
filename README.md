@@ -62,13 +62,21 @@ function call
 (+ (- (* 3.1 2) 0.3) (/ 6 3))               => 7.9
 ```
 
-subscript
+subscript:
+use number values as array index
+use string (eg. "m") or symbol (eg. $t) values as map keys
 ```
 (@ [[{m: [2 {t:2}], n:2}]] 0 0 "m" 1 $t)    => 2
 ```
 
-instance method call
+method call
 ```
 (. {m:2} (put "a" 1) (keys))            => ["m", "a"]
 ```
 
+function value in a map is treated as a method
+```
+(. { add2: (func (obj x y) (+ x y)) }
+    (add2 1 2)
+)
+```
