@@ -5,7 +5,7 @@ import link.symtable.kson.core.interpreter.functions.HostPrimitiveFuctions;
 import link.symtable.kson.core.node.KsNode;
 import link.symtable.kson.core.node.KsNull;
 import link.symtable.kson.core.node.KsContinuation;
-import link.symtable.kson.core.interpreter.continuation.ReturnContInstance;
+import link.symtable.kson.core.interpreter.continuation.LandContInstance;
 import link.symtable.kson.core.interpreter.continuation.ContinuationHelpers;
 
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class Interpreter {
         ExecAction nextAction;
         KsNode lastValue = KsNull.NULL;
         KsNode currentNodeToRun = ast;
-        KsContinuation currentContInstance = new ReturnContInstance(null, env);
+        KsContinuation currentContInstance = new LandContInstance(null, env);
 
         ContRunResult r = ContinuationHelpers.EntryContHandler.run(state, lastValue, currentNodeToRun, currentContInstance);
 
@@ -36,7 +36,7 @@ public class Interpreter {
             log.info("lastValue {}", lastValue);
             switch (nextAction) {
                 case RUN_CONT:
-                    r = currentContInstance.run(state, lastValue, currentNodeToRun);
+                    r = currentContInstance.runWithValue(state, lastValue, currentNodeToRun);
                     break;
                 default:
                     // 不应该执行到这里

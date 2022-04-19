@@ -79,7 +79,7 @@ public class InterpreterTest extends TestBase {
     @Test
     public void testBlock() {
         String source =
-                "(begin (write_line \"line1\") (write_line \"line2\") (blk (write_line \"nested\")))";
+                "(begin (write_line \"line1\") (write_line \"line2\") (begin (write_line \"nested\")))";
         KsNode node = Kson.parse(source);
 
         ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());

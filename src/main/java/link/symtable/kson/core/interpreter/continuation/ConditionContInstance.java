@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import link.symtable.kson.core.interpreter.ContRunResult;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
+import link.symtable.kson.core.node.KsBoolean;
 import link.symtable.kson.core.node.KsContinuation;
 import link.symtable.kson.core.node.KsListNode;
 import link.symtable.kson.core.node.KsNode;
@@ -48,18 +49,18 @@ public class ConditionContInstance extends KsContinuation {
 
     }
 
-    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         if (pendingPairs.size() == 0) {
             if (needExecFallback) {
                 needExecFallback = false;
                 BlockContInstance nextCont = new BlockContInstance(getNext(), fallbackBlock);
-                return nextCont.initNextRun(state, lastValue, fallbackBlock);
+                return nextCont.prepareNextRun(state, fallbackBlock);
             } else {
                 return ContRunResult.builder()
                         .nextAction(ExecAction.RUN_CONT)
                         .nextCont(getNext())
                         .nextNodeToRun(currentNodeToRun)
-                        .newLastValue(lastValue)
+                        .newLastValue(KsBoolean.FALSE)
                         .build();
             }
         } else {
@@ -67,17 +68,17 @@ public class ConditionContInstance extends KsContinuation {
             KsNode nextToRun = condPair.getLeft();
             currentBranchBlock = condPair.getRight();
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
-            return nextCont.initNextRun(state, lastValue, nextToRun);
+            return nextCont.prepareNextRun(state, nextToRun);
         }
     }
 
     @Override
-    public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         boolean lastCondExprResult = lastValue.toBoolean();
         if (lastCondExprResult) {
             BlockContInstance nextCont = new BlockContInstance(getNext(), currentBranchBlock);
-            return nextCont.initNextRun(state, lastValue, currentBranchBlock);
+            return nextCont.prepareNextRun(state, currentBranchBlock);
         }
-        return initNextRun(state, lastValue, currentNodeToRun);
+        return prepareNextRun(state, currentNodeToRun);
     }
 }

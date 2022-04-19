@@ -13,10 +13,11 @@ import link.symtable.kson.core.node.KsHostSyncFunction;
 import link.symtable.kson.core.node.KsLambdaFunction;
 import link.symtable.kson.core.node.KsListNode;
 import link.symtable.kson.core.node.KsNode;
+import link.symtable.kson.core.node.KsNull;
 
 public class FuncCallContInstance extends KsContinuation {
-    private LinkedList<KsNode> pendingNodes = new LinkedList<>();;
-    private LinkedList<KsNode> evaledNodes = new LinkedList<>();;
+    private LinkedList<KsNode> pendingNodes = new LinkedList<>();
+    private LinkedList<KsNode> evaledNodes = new LinkedList<>();
 
     public FuncCallContInstance(KsContinuation currentCont, KsListNode nodeToRun) {
         super(currentCont);
@@ -45,7 +46,7 @@ public class FuncCallContInstance extends KsContinuation {
         evaledNodes.addAll(evaledArgs);
     }
 
-    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         if (pendingNodes.size() == 0) {
             if (evaledNodes.size() == 0) {
                 throw new RuntimeException("cannot eval empty expr");
@@ -82,23 +83,18 @@ public class FuncCallContInstance extends KsContinuation {
                 // 创建buildin的 continuation变量
                 childEnv.define("return", getNext());
                 BlockContInstance nextCont = new BlockContInstance(getNext(), func.getBlock(), childEnv);
-                return nextCont.initNextRun(state, lastValue, func.getBlock());
+                return nextCont.prepareNextRun(state, func.getBlock());
             }
         } else {
             KsNode nextToRun = pendingNodes.pollFirst();
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
-            return ContRunResult.builder()
-                    .nextAction(ExecAction.RUN_CONT)
-                    .nextCont(nextCont)
-                    .nextNodeToRun(nextToRun)
-                    .newLastValue(lastValue)
-                    .build();
+            return nextCont.prepareNextRun(state, nextToRun);
         }
     }
 
     @Override
-    public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         evaledNodes.add(lastValue);
-        return initNextRun(state, lastValue, currentNodeToRun);
+        return prepareNextRun(state, currentNodeToRun);
     }
 }

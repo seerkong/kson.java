@@ -26,7 +26,7 @@ public class FuncDeclareContInstance extends KsContinuation {
     }
 
     @Override
-    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         KsLambdaFunction func = new KsLambdaFunction(funcName, params, block);
         if (funcName != null) {
             getEnv().define(funcName, func);

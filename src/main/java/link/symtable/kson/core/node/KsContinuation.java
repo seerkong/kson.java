@@ -26,9 +26,9 @@ public abstract class KsContinuation extends KsNodeBase {
         return curEnv;
     }
 
-    public abstract ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun);
+    public abstract ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun);
 
-    public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
-        return initNextRun(state, lastValue, currentNodeToRun);
+    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+        return prepareNextRun(state, currentNodeToRun);
     }
 }

@@ -22,27 +22,16 @@ public class SetContInstance extends KsContinuation {
         varValueExpr = expr.getNext().getNext().getValue();
     }
 
-    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
-        if (varValueExpr.equals(KsNull.NULL)) {
-            Env varDeclaredAtEnv = getEnv().lookupDeclareEnv(varName);
-            varDeclaredAtEnv.define(varName, varValueExpr);
-            return ContRunResult.builder()
-                    .nextAction(ExecAction.RUN_CONT)
-                    .nextCont(getNext())
-                    .nextNodeToRun(currentNodeToRun)
-                    .newLastValue(lastValue)
-                    .build();
-        } else {
-            KsNode nextToRun = varValueExpr;
-            ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
-            return nextCont.initNextRun(state, lastValue, nextToRun);
-        }
+    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
+        KsNode nextToRun = varValueExpr;
+        ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
+        return nextCont.prepareNextRun(state, nextToRun);
     }
 
     @Override
-    public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         Env varDeclaredAtEnv = getEnv().lookupDeclareEnv(varName);
-        varDeclaredAtEnv.define(varName, varValueExpr);
+        varDeclaredAtEnv.define(varName, lastValue);
         return ContRunResult.builder()
                 .nextAction(ExecAction.RUN_CONT)
                 .nextCont(getNext())

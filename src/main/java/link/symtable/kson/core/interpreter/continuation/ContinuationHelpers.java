@@ -10,7 +10,7 @@ public class ContinuationHelpers {
         @Override
         public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun, KsContinuation currentCont) {
             ExecNodeContInstance nextCont = new ExecNodeContInstance(currentCont);
-            return nextCont.initNextRun(state, lastValue, currentNodeToRun);
+            return nextCont.prepareNextRun(state, currentNodeToRun);
         }
     };
 }

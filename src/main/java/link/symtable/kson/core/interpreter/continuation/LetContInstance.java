@@ -10,7 +10,7 @@ import link.symtable.kson.core.node.KsNull;
 
 public class LetContInstance extends KsContinuation {
     private String varName;
-    private KsNode varValueExpr = KsNull.NULL;
+    private KsNode varValueExpr = null;
     public LetContInstance(KsContinuation currentCont, KsListNode expr) {
         super(currentCont);
         if (expr.getNext() == KsListNode.NIL) {
@@ -23,24 +23,24 @@ public class LetContInstance extends KsContinuation {
         }
     }
 
-    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
-        if (varValueExpr.equals(KsNull.NULL)) {
-            getEnv().define(varName, varValueExpr);
+    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
+        if (varValueExpr == null) {
+            getEnv().define(varName, KsNull.NULL);
             return ContRunResult.builder()
                     .nextAction(ExecAction.RUN_CONT)
                     .nextCont(getNext())
                     .nextNodeToRun(currentNodeToRun)
-                    .newLastValue(lastValue)
+                    .newLastValue(KsNull.NULL)
                     .build();
         } else {
             KsNode nextToRun = varValueExpr;
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
-            return nextCont.initNextRun(state, lastValue, nextToRun);
+            return nextCont.prepareNextRun(state, nextToRun);
         }
     }
 
     @Override
-    public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         getEnv().define(varName, lastValue);
         return ContRunResult.builder()
                 .nextAction(ExecAction.RUN_CONT)

@@ -80,3 +80,8 @@ function value in a map is treated as a method
     (add2 1 2)
 )
 ```
+
+quote as data
+```
+(% (/ 6 3)) => (% (/ 6 3))
+```

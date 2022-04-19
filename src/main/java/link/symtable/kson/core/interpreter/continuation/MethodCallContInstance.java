@@ -14,7 +14,6 @@ import link.symtable.kson.core.interpreter.oopsupport.SupportMethodCall;
 import link.symtable.kson.core.interpreter.oopsupport.SupportSubscript;
 import link.symtable.kson.core.node.KsArray;
 import link.symtable.kson.core.node.KsContinuation;
-import link.symtable.kson.core.node.KsFunction;
 import link.symtable.kson.core.node.KsListNode;
 import link.symtable.kson.core.node.KsNode;
 
@@ -51,14 +50,14 @@ public class MethodCallContInstance extends KsContinuation {
         }
     }
 
-    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         if (targetEvaled == null) {
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
-            return nextCont.initNextRun(state, lastValue, targetNode);
+            return nextCont.prepareNextRun(state, targetNode);
         } else if (pendingMethodAndArgsPairs.size() > 0) {
             currentEvalArgsTask = pendingMethodAndArgsPairs.pollFirst();
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
-            return nextCont.initNextRun(state, lastValue, currentEvalArgsTask.getRight());
+            return nextCont.prepareNextRun(state, currentEvalArgsTask.getRight());
         } else if (evaledMethodAndArgsPairs.size() > 0) {
             currentApplyMethodTask = evaledMethodAndArgsPairs.pollFirst();
             String methodName = currentApplyMethodTask.getLeft();
@@ -69,8 +68,8 @@ public class MethodCallContInstance extends KsContinuation {
                     List<KsNode> args = new ArrayList<>();
                     args.add(targetNode);
                     args.addAll(currentApplyMethodTask.getRight().getItems());
-                    FuncCallContInstance newCont = new FuncCallContInstance(getNext(), fieldValue.asFunction(), args);
-                    return newCont.initNextRun(state, lastValue, currentNodeToRun);
+                    FuncCallContInstance newCont = new FuncCallContInstance(this, fieldValue.asFunction(), args);
+                    return newCont.prepareNextRun(state, currentNodeToRun);
                 } else {
                     throw new RuntimeException("field is not a function, call method not supported");
                 }
@@ -100,7 +99,7 @@ public class MethodCallContInstance extends KsContinuation {
     }
 
     @Override
-    public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         if (currentEvalArgsTask == null) {
             // step1 eval first target
             targetEvaled = lastValue;
@@ -111,6 +110,6 @@ public class MethodCallContInstance extends KsContinuation {
             // step3 apply args to method
             targetEvaled = lastValue;
         }
-        return initNextRun(state, lastValue, currentNodeToRun);
+        return prepareNextRun(state, currentNodeToRun);
     }
 }

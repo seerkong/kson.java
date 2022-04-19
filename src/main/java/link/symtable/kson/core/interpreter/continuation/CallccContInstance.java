@@ -18,10 +18,10 @@ public class CallccContInstance extends KsContinuation {
     }
 
     @Override
-    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         // 将上个continuation作为函数参数，执行函数
         KsListNode params = new KsListNode(getNext());
         FuncCallContInstance newCont = new FuncCallContInstance(getNext(), func, params);
-        return newCont.initNextRun(state, lastValue, currentNodeToRun);
+        return newCont.prepareNextRun(state, currentNodeToRun);
     }
 }

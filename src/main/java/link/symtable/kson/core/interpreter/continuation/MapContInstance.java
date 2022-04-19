@@ -31,7 +31,7 @@ public class MapContInstance extends KsContinuation {
 
     }
 
-    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         if (pendingPairs.size() == 0) {
             KsMap map = new KsMap(evaledPairs);
             return ContRunResult.builder()
@@ -44,13 +44,13 @@ public class MapContInstance extends KsContinuation {
             currentPair = pendingPairs.pollFirst();
             KsNode nextToRun = currentPair.getValue();
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
-            return nextCont.initNextRun(state, lastValue, nextToRun);
+            return nextCont.prepareNextRun(state, nextToRun);
         }
     }
 
     @Override
-    public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         evaledPairs.add(new ImmutablePair<>(currentPair.getKey(), lastValue));
-        return initNextRun(state, lastValue, currentNodeToRun);
+        return prepareNextRun(state, currentNodeToRun);
     }
 }

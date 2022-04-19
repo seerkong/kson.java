@@ -20,8 +20,8 @@ public class ExecNodeContInstance extends KsContinuation {
     }
 
     @Override
-    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
-        KsNode newLastVal = lastValue;
+    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
+        KsNode newLastVal;
         if (NodeTypeHelper.isSelfEvaluatedNode(currentNodeToRun)) {
             newLastVal = currentNodeToRun;
             return ContRunResult.builder()
@@ -43,23 +43,23 @@ public class ExecNodeContInstance extends KsContinuation {
         } else if (currentNodeToRun instanceof KsArray) {
             KsArray arr = (KsArray) currentNodeToRun;
             ArrayContInstance newCont = new ArrayContInstance(getNext(), arr);
-            return newCont.initNextRun(state, lastValue, currentNodeToRun);
+            return newCont.prepareNextRun(state, currentNodeToRun);
         } else if (currentNodeToRun instanceof KsMap) {
             KsMap map = (KsMap) currentNodeToRun;
             MapContInstance newCont = new MapContInstance(getNext(), map);
-            return newCont.initNextRun(state, lastValue, currentNodeToRun);
+            return newCont.prepareNextRun(state, currentNodeToRun);
         } else if (currentNodeToRun instanceof KsListNode) {
             KsListNode list = (KsListNode) currentNodeToRun;
             KsNode firstNode = list.getValue();
             if (firstNode.isWord() && Registry.keywords.containsKey(firstNode.asWord().getValue())) {
                 String keyword = firstNode.asWord().getValue();
                 KsContinuation newCont = Registry.keywords.get(keyword).apply(getNext(), list);
-                return newCont.initNextRun(state, lastValue, currentNodeToRun);
+                return newCont.prepareNextRun(state, currentNodeToRun);
             } else {
                 FuncCallContInstance newCont = new FuncCallContInstance(getNext(), list);
-                return newCont.initNextRun(state, lastValue, currentNodeToRun);
+                return newCont.prepareNextRun(state, currentNodeToRun);
             }
         }
-        throw new NotImplementedException("ExecNodeContInstance#run " + newLastVal);
+        throw new NotImplementedException("ExecNodeContInstance#prepareNextRun currentNodeToRun " + currentNodeToRun);
     }
 }

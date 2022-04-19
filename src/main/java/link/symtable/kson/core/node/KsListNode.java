@@ -10,9 +10,10 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import link.symtable.kson.core.interpreter.ExecState;
 
+import lombok.Data;
 import lombok.Getter;
 
-@Getter
+@Data
 public class KsListNode extends KsContainerNode {
     public static KsListNode NIL = null;
 

@@ -25,7 +25,7 @@ public class AndContInstance extends KsContinuation {
         }
     }
 
-    public ContRunResult initNextRun(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         if (pendingNodes.size() == 0) {
             return ContRunResult.builder()
                     .nextAction(ExecAction.RUN_CONT)
@@ -36,14 +36,14 @@ public class AndContInstance extends KsContinuation {
         } else {
             KsNode nextToRun = pendingNodes.pollFirst();
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
-            return nextCont.initNextRun(state, lastValue, nextToRun);
+            return nextCont.prepareNextRun(state, nextToRun);
         }
     }
 
     @Override
-    public ContRunResult run(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         if (lastValue.toBoolean()) {
-            return initNextRun(state, lastValue, currentNodeToRun);
+            return prepareNextRun(state, currentNodeToRun);
         } else {
             return ContRunResult.builder()
                     .nextAction(ExecAction.RUN_CONT)

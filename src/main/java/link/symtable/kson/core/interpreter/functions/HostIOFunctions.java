@@ -4,6 +4,7 @@ import link.symtable.kson.core.interpreter.Env;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.node.KsBoolean;
 import link.symtable.kson.core.node.KsHostSyncFunction;
+import link.symtable.kson.core.node.KsInt64;
 import link.symtable.kson.core.node.KsNode;
 import link.symtable.kson.core.util.ArgsCountNotMatchException;
 
@@ -23,6 +24,19 @@ public class HostIOFunctions {
             System.out.println(args[0].toString());
         }
 
+        return KsBoolean.TRUE;
+    }
+
+    public static KsNode sleep(ExecState state, KsNode[] args) {
+        if (args.length < 1) {
+            throw new ArgsCountNotMatchException("expect at least 1 arg");
+        }
+        KsInt64 sleepTimeInMillis = args[0].asInt64();
+        try {
+            Thread.sleep(sleepTimeInMillis.getValue());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return KsBoolean.TRUE;
     }
 }
