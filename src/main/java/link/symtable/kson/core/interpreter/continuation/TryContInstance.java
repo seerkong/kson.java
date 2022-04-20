@@ -3,7 +3,7 @@ package link.symtable.kson.core.interpreter.continuation;
 import java.util.ArrayList;
 import java.util.List;
 
-import link.symtable.kson.core.interpreter.ContRunResult;
+import link.symtable.kson.core.interpreter.ContRunState;
 import link.symtable.kson.core.interpreter.Env;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.node.KsArray;
@@ -24,11 +24,15 @@ public class TryContInstance extends KsContinuation  {
         while (iter != KsListNode.NIL) {
             KsListNode handlerClause = iter.getValue().asListNode();
             KsWord handlerName = handlerClause.getNextValue().asWord();
-            KsListNode originArgTable = handlerClause.getNextNextValue().asListNode();
-            KsListNode modifiedArgTable = new KsListNode(new KsWord("resume"), originArgTable);
+
+            KsArray argTable = handlerClause.getNextNextValue().asArray();
+            argTable.shift(new KsWord("resume"));
+            argTable.shift(new KsWord("resolve"));
+            argTable.shift(new KsWord("reject"));
+
             KsListNode handlerBlock = handlerClause.getNextNextNext();
             // make a function cont instance
-            KsLambdaFunction func = new KsLambdaFunction(null, modifiedArgTable, handlerBlock);
+            KsLambdaFunction func = new KsLambdaFunction(null, argTable, handlerBlock);
             String handlerVarName = String.format("__handler_%s", handlerName.getValue());
             List<KsNode> handlerAndNextCont = new ArrayList<>();
             handlerAndNextCont.add(func);
@@ -42,7 +46,7 @@ public class TryContInstance extends KsContinuation  {
     }
 
     @Override
-    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
+    public ContRunState prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         Env childEnv = Env.makeChildEnv(getEnv());
         BlockContInstance nextCont = new BlockContInstance(getNext(), block, childEnv);
         return nextCont.prepareNextRun(state, block);

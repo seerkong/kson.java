@@ -3,7 +3,7 @@ package link.symtable.kson.core.interpreter.continuation;
 import java.util.LinkedList;
 import java.util.List;
 
-import link.symtable.kson.core.interpreter.ContRunResult;
+import link.symtable.kson.core.interpreter.ContRunState;
 import link.symtable.kson.core.interpreter.Env;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
@@ -13,7 +13,6 @@ import link.symtable.kson.core.node.KsHostSyncFunction;
 import link.symtable.kson.core.node.KsLambdaFunction;
 import link.symtable.kson.core.node.KsListNode;
 import link.symtable.kson.core.node.KsNode;
-import link.symtable.kson.core.node.KsNull;
 
 public class FuncCallContInstance extends KsContinuation {
     private LinkedList<KsNode> pendingNodes = new LinkedList<>();
@@ -46,7 +45,7 @@ public class FuncCallContInstance extends KsContinuation {
         evaledNodes.addAll(evaledArgs);
     }
 
-    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
+    public ContRunState prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         if (pendingNodes.size() == 0) {
             if (evaledNodes.size() == 0) {
                 throw new RuntimeException("cannot eval empty expr");
@@ -55,16 +54,17 @@ public class FuncCallContInstance extends KsContinuation {
             KsNode[] args = evaledNodes.toArray(new KsNode[evaledNodes.size()]);
             if (funcNode instanceof KsHostSyncFunction) {
                 KsNode applyResult = ((KsHostSyncFunction) funcNode).apply(state, args);
-                return ContRunResult.builder()
+                return ContRunState.builder()
                         .nextAction(ExecAction.RUN_CONT)
                         .nextCont(getNext())
                         .nextNodeToRun(currentNodeToRun)
                         .newLastValue(applyResult)
+                        .isSafePoint(true)
                         .build();
             } else if (funcNode instanceof KsContinuation) {
                 // cont的参数计算完毕，可以恢复现场了
                 KsNode newLastValToResumeCont = args[0];
-                return ContRunResult.builder()
+                return ContRunState.builder()
                         .nextAction(ExecAction.RUN_CONT)
                         .nextCont((KsContinuation) funcNode)
                         .nextNodeToRun(currentNodeToRun)
@@ -93,7 +93,7 @@ public class FuncCallContInstance extends KsContinuation {
     }
 
     @Override
-    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunState runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         evaledNodes.add(lastValue);
         return prepareNextRun(state, currentNodeToRun);
     }

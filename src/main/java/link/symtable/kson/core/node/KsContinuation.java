@@ -1,6 +1,6 @@
 package link.symtable.kson.core.node;
 
-import link.symtable.kson.core.interpreter.ContRunResult;
+import link.symtable.kson.core.interpreter.ContRunState;
 import link.symtable.kson.core.interpreter.Env;
 import link.symtable.kson.core.interpreter.ExecState;
 
@@ -26,9 +26,9 @@ public abstract class KsContinuation extends KsNodeBase {
         return curEnv;
     }
 
-    public abstract ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun);
+    public abstract ContRunState prepareNextRun(ExecState state, KsNode currentNodeToRun);
 
-    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunState runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         return prepareNextRun(state, currentNodeToRun);
     }
 }

@@ -1,6 +1,6 @@
 package link.symtable.kson.core.interpreter.continuation;
 
-import link.symtable.kson.core.interpreter.ContRunResult;
+import link.symtable.kson.core.interpreter.ContRunState;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.node.KsContinuation;
@@ -23,10 +23,10 @@ public class LetContInstance extends KsContinuation {
         }
     }
 
-    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
+    public ContRunState prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         if (varValueExpr == null) {
             getEnv().define(varName, KsNull.NULL);
-            return ContRunResult.builder()
+            return ContRunState.builder()
                     .nextAction(ExecAction.RUN_CONT)
                     .nextCont(getNext())
                     .nextNodeToRun(currentNodeToRun)
@@ -40,9 +40,9 @@ public class LetContInstance extends KsContinuation {
     }
 
     @Override
-    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunState runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         getEnv().define(varName, lastValue);
-        return ContRunResult.builder()
+        return ContRunState.builder()
                 .nextAction(ExecAction.RUN_CONT)
                 .nextCont(getNext())
                 .nextNodeToRun(currentNodeToRun)

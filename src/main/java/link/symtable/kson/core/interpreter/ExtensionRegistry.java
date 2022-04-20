@@ -15,13 +15,14 @@ import link.symtable.kson.core.interpreter.continuation.OrContInstance;
 import link.symtable.kson.core.interpreter.continuation.PerformContInstance;
 import link.symtable.kson.core.interpreter.continuation.QuoteContInstance;
 import link.symtable.kson.core.interpreter.continuation.SetContInstance;
+import link.symtable.kson.core.interpreter.continuation.SetTimeoutContInstance;
 import link.symtable.kson.core.interpreter.continuation.SubscriptContInstance;
 import link.symtable.kson.core.interpreter.continuation.TryContInstance;
 import link.symtable.kson.core.node.KsContinuation;
 import link.symtable.kson.core.node.KsListNode;
 
 
-public class Registry {
+public class ExtensionRegistry {
     public static Map<String, BiFunction<KsContinuation, KsListNode, KsContinuation>> keywords = new HashMap<>();
 
     static {
@@ -40,6 +41,9 @@ public class Registry {
         keywords.put("or", OrContInstance::new);
         keywords.put("call_cc", CallccContInstance::new);
         keywords.put("try", TryContInstance::new);
-        keywords.put("perform", PerformContInstance::new);
+        keywords.put("perform", (nextCont, expr) -> {
+            return new PerformContInstance(nextCont, expr, false);
+        });
+        keywords.put("set_timeout", SetTimeoutContInstance::new);
     }
 }

@@ -76,7 +76,7 @@ method call
 
 function value in a map is treated as a method
 ```
-(. { add2: (func (obj x y) (+ x y)) }
+(. { add2: (func [obj x y] (+ x y)) }
     (add2 1 2)
 )
 ```

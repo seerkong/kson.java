@@ -40,6 +40,13 @@ public class KsMap extends KsContainerNode implements SupportMethodCall, Map {
         this(entriesToMap(new ArrayList<>(members)));
     }
 
+    public KsMap(Map<String, KsNode> initMap) {
+        value = new LinkedHashMap<>();
+        for (Map.Entry<String, KsNode> member : initMap.entrySet()) {
+            value.put(member.getKey(), member.getValue());
+        }
+    }
+
     private static LinkedHashMap<String, KsNode> entriesToMap(Collection<Pair<String, KsNode>> members) {
         LinkedHashMap<String, KsNode> map = new LinkedHashMap<>();
         for (Map.Entry<String, KsNode> member : members) {

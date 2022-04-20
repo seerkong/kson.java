@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import link.symtable.kson.core.interpreter.ContRunResult;
+import link.symtable.kson.core.interpreter.ContRunState;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.node.KsArray;
@@ -18,30 +18,37 @@ public class PerformContInstance extends KsContinuation {
     private String handlerName;
     private LinkedList<KsNode> pendingNodes = new LinkedList<>();
     private LinkedList<KsNode> evaledNodes = new LinkedList<>();
-    private boolean waitingResume = false;
+    private boolean needReturnErrors = false;
 
-    public PerformContInstance(KsContinuation currentCont, KsListNode expr) {
+    public PerformContInstance(KsContinuation currentCont, KsListNode expr, boolean needReturnErrors) {
         super(currentCont);
+        this.needReturnErrors = needReturnErrors;
         KsWord handlerWord = expr.getNextValue().asWord();
         handlerName = handlerWord.getValue();
-        KsListNode iter = expr.getNextNextValue().asListNode();
-        while (iter != KsListNode.NIL) {
-            pendingNodes.add(iter.getValue());
-            iter = iter.getNext();
+
+        KsArray params = expr.getNextNextValue().asArray();
+        for (int i = 0; i < params.size(); i++) {
+            pendingNodes.add(params.get(i));
         }
     }
 
     @Override
-    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
+    public ContRunState prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         if (pendingNodes.size() == 0) {
-            waitingResume = true;
             String handlerVarName = String.format("__handler_%s", handlerName);
             KsNode lookupResult = getEnv().lookup(handlerVarName);
             KsArray handlerAndNextContArr = lookupResult.asArray();
             KsLambdaFunction performHander = (KsLambdaFunction)handlerAndNextContArr.get(0);
             KsContinuation tryNextCont = (KsContinuation)handlerAndNextContArr.get(1);
+
+            WaitTaskContInstance waitCont = new WaitSingleTaskContInstance(getNext(), handlerName, needReturnErrors);
+            ResumeTaskContInstance resolveCont = new ResumeTaskContInstance(waitCont, handlerName, true);
+            ResumeTaskContInstance rejectCont = new ResumeTaskContInstance(waitCont, handlerName, false);
+
             List<KsNode> params = new ArrayList<>();
-            params.add(this);    // resume
+            params.add(resolveCont);    // resume
+            params.add(resolveCont);    // resolve
+            params.add(rejectCont);    // reject
             params.addAll(evaledNodes);
             FuncCallContInstance newCont = new FuncCallContInstance(tryNextCont, performHander, params);
             return newCont.prepareNextRun(state, currentNodeToRun);
@@ -53,17 +60,8 @@ public class PerformContInstance extends KsContinuation {
     }
 
     @Override
-    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
-        if (waitingResume) {
-            return ContRunResult.builder()
-                    .nextAction(ExecAction.RUN_CONT)
-                    .nextCont(getNext())
-                    .nextNodeToRun(currentNodeToRun)
-                    .newLastValue(lastValue)
-                    .build();
-        } else {
-            evaledNodes.add(lastValue);
-            return prepareNextRun(state, currentNodeToRun);
-        }
+    public ContRunState runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+        evaledNodes.add(lastValue);
+        return prepareNextRun(state, currentNodeToRun);
     }
 }

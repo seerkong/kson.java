@@ -1,5 +1,5 @@
 (begin
-    (func run (v1 v2)
+    (func run [v1 v2]
         (write_line "run perform start")
         (let temp (perform add (v1 v2)))
         (write_line "after perform add (v1 v2)")
@@ -15,7 +15,7 @@
         )
         (handle add (v1 v2)
             (set_timeout
-                (func ()
+                (func []
                     (write_line "before resume (+ v1 v2)")
                     (resume (+ v1 v2))
                     (write_line "should not go here")
@@ -25,7 +25,7 @@
         )
         (handle multi (v1 v2)
             (set_timeout
-                (func ()
+                (func []
                     (write_line "before resume (* v1 v2)")
                     (resume (* v1 v2))
                     (write_line "should not go here")
@@ -40,7 +40,7 @@
 )
 
 
-(func run (v1 v2)
+(func run [v1 v2]
     (write_line "run start")
     (let temp (perform add (v1 v2)))
     (let result (perform multi (temp 2)))
@@ -52,9 +52,9 @@
         (run 1 2)
     )
     (handle add (v1 v2)
-        (set_timeout (func () (resume (+ v1 v2))) 1000)
+        (set_timeout (func [] (resume (+ v1 v2))) 1000)
     )
     (handle multi (v1 v2)
-        (set_timeout (func () (resume (* v1 v2))) 2000)
+        (set_timeout (func [] (resume (* v1 v2))) 2000)
     )
 )

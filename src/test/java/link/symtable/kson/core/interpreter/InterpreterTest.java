@@ -109,7 +109,7 @@ public class InterpreterTest extends TestBase {
     @Test
     public void testFunc() {
         String source =
-                "(begin (func add3 (x y z) (+ (+ x y) z)) (add3 1 2 3))";
+                "(begin (func add3 [x y z] (+ (+ x y) z)) (add3 1 2 3))";
         KsNode node = Kson.parse(source);
 
         ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());
@@ -165,7 +165,7 @@ public class InterpreterTest extends TestBase {
 
     @Test
     public void testFuncWithoutName() {
-        String source = "(func (x) x )";
+        String source = "(func [x] x )";
         KsNode node = Kson.parse(source);
 
         ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());
@@ -176,7 +176,7 @@ public class InterpreterTest extends TestBase {
     @Test
     public void testWithoutCallcc() {
         String source =
-                "(begin (func f (ret) (ret 2) 3 )  (write_line (f (func (x) x)) ) )";
+                "(begin (func f [ret] (ret 2) 3 )  (write_line (f (func [x] x)) ) )";
         KsNode node = Kson.parse(source);
 
         ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());
@@ -187,7 +187,7 @@ public class InterpreterTest extends TestBase {
     @Test
     public void testWithCallcc() {
         String source =
-                "(begin (func f (ret) (ret 2) 3 )  (write_line (call_cc f)) )";
+                "(begin (func f [ret] (ret 2) 3 )  (write_line (call_cc f)) )";
         KsNode node = Kson.parse(source);
 
         ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());
@@ -198,7 +198,7 @@ public class InterpreterTest extends TestBase {
     @Test
     public void testReturn1() {
         String source =
-                "(begin (func f (x) (return 2) x )  (write_line (f 4)) )";
+                "(begin (func f [x] (return 2) x )  (write_line (f 4)) )";
         KsNode node = Kson.parse(source);
 
         ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());
@@ -209,7 +209,7 @@ public class InterpreterTest extends TestBase {
     @Test
     public void testReturn2() {
         String source =
-                "(begin (func f (x) (return (+ 3 5)) x )  (write_line (f 4)) )";
+                "(begin (func f [x] (return (+ 3 5)) x )  (write_line (f 4)) )";
         KsNode node = Kson.parse(source);
 
         ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());
@@ -225,5 +225,17 @@ public class InterpreterTest extends TestBase {
 
         log.info("result {}", r.getData());
         Assertions.assertTrue(r.getData().equals(new KsInt64(3)));
+    }
+
+    @Test
+    public void setTimeout() {
+        String source =
+                "(begin (set_timeout (func [] (write_line \"abcd\")) 500 ) 6)";
+        KsNode node = Kson.parse(source);
+
+        ExecResult r = interp.run(node, new ExecState(), Env.makeRootEnv());
+
+        log.info("result {}", r.getData());
+        Assertions.assertTrue(r.getData().equals(new KsInt64(6)));
     }
 }

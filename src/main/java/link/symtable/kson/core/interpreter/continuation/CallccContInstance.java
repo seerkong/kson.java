@@ -1,6 +1,6 @@
 package link.symtable.kson.core.interpreter.continuation;
 
-import link.symtable.kson.core.interpreter.ContRunResult;
+import link.symtable.kson.core.interpreter.ContRunState;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.node.KsContinuation;
 import link.symtable.kson.core.node.KsFunction;
@@ -18,7 +18,7 @@ public class CallccContInstance extends KsContinuation {
     }
 
     @Override
-    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
+    public ContRunState prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         // 将上个continuation作为函数参数，执行函数
         KsListNode params = new KsListNode(getNext());
         FuncCallContInstance newCont = new FuncCallContInstance(getNext(), func, params);

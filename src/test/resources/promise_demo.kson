@@ -2,18 +2,18 @@
     # promise的参数是一个function，这个function有两个参数，一个是成功的callback resolve, 另外一个是失败的callback reject
     # 返回一个function, 这个function有两个参数，
     # 一个参数是sucess handler, 另一个是error handler
-    (func promise (task)
+    (func promise [task]
         (task
-            (function (task_ok_val)
+            (function [task_ok_val]
                 # 返回对应js的Promise的then实现
-                (func (on_ok_handler, on_error_handler)
+                (func [on_ok_handler, on_error_handler]
                     (on_ok_handler task_ok_val)
                 )
             )
 
-            (function (task_error_info)
+            (func [task_error_info]
                 # 返回对应js的Promise的then实现
-                (func (on_ok_handler, on_error_handler)
+                (func [on_ok_handler, on_error_handler]
                     (on_error_handler task_error_info)
                 )
             )

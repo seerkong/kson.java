@@ -1,7 +1,7 @@
 package link.symtable.kson.core.interpreter.continuation;
 
 
-import link.symtable.kson.core.interpreter.ContRunResult;
+import link.symtable.kson.core.interpreter.ContRunState;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.node.KsContinuation;
@@ -15,8 +15,8 @@ public class QuoteContInstance extends KsContinuation {
     }
 
     @Override
-    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
-        return ContRunResult.builder()
+    public ContRunState prepareNextRun(ExecState state, KsNode currentNodeToRun) {
+        return ContRunState.builder()
                 .nextAction(ExecAction.RUN_CONT)
                 .nextCont(getNext())
                 .nextNodeToRun(currentNodeToRun)

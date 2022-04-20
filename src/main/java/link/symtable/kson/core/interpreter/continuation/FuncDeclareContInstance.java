@@ -1,6 +1,6 @@
 package link.symtable.kson.core.interpreter.continuation;
 
-import link.symtable.kson.core.interpreter.ContRunResult;
+import link.symtable.kson.core.interpreter.ContRunState;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.node.KsContinuation;
@@ -9,29 +9,19 @@ import link.symtable.kson.core.node.KsListNode;
 import link.symtable.kson.core.node.KsNode;
 
 public class FuncDeclareContInstance extends KsContinuation {
-    private String funcName = null;
-    private KsListNode params;
-    private KsListNode block;
+    private KsListNode declareExpr;
     public FuncDeclareContInstance(KsContinuation currentCont, KsListNode expr) {
         super(currentCont);
-
-        if (expr.getNext().getValue().isWord()) {
-            funcName = expr.getNext().getValue().asWord().getValue();
-            expr = expr.getNext().getNext();
-        } else {
-            expr = expr.getNext();
-        }
-        params = expr.getValue().asListNode();
-        block = expr.getNext();
+        this.declareExpr = expr;
     }
 
     @Override
-    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
-        KsLambdaFunction func = new KsLambdaFunction(funcName, params, block);
-        if (funcName != null) {
-            getEnv().define(funcName, func);
+    public ContRunState prepareNextRun(ExecState state, KsNode currentNodeToRun) {
+        KsLambdaFunction func = new KsLambdaFunction(declareExpr);
+        if (func.getName() != null) {
+            getEnv().define(func.getName(), func);
         }
-        return ContRunResult.builder()
+        return ContRunState.builder()
                 .nextAction(ExecAction.RUN_CONT)
                 .nextCont(getNext())
                 .nextNodeToRun(currentNodeToRun)

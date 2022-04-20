@@ -2,13 +2,13 @@ package link.symtable.kson.core.interpreter.continuation;
 
 import org.apache.commons.lang3.NotImplementedException;
 
-import link.symtable.kson.core.interpreter.Registry;
+import link.symtable.kson.core.interpreter.ExtensionRegistry;
 import link.symtable.kson.core.node.KsArray;
 import link.symtable.kson.core.node.KsContinuation;
 import link.symtable.kson.core.node.KsListNode;
 import link.symtable.kson.core.node.KsMap;
 import link.symtable.kson.core.node.KsNode;
-import link.symtable.kson.core.interpreter.ContRunResult;
+import link.symtable.kson.core.interpreter.ContRunState;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.interpreter.util.NodeTypeHelper;
@@ -20,11 +20,11 @@ public class ExecNodeContInstance extends KsContinuation {
     }
 
     @Override
-    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
+    public ContRunState prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         KsNode newLastVal;
         if (NodeTypeHelper.isSelfEvaluatedNode(currentNodeToRun)) {
             newLastVal = currentNodeToRun;
-            return ContRunResult.builder()
+            return ContRunState.builder()
                     .nextAction(ExecAction.RUN_CONT)
                     .nextCont(getNext())
                     .nextNodeToRun(currentNodeToRun)
@@ -34,7 +34,7 @@ public class ExecNodeContInstance extends KsContinuation {
             KsWord w = (KsWord) currentNodeToRun;
             newLastVal = getEnv().lookup(w.getValue());
             // TODO CHECK newLastVal
-            return ContRunResult.builder()
+            return ContRunState.builder()
                     .nextAction(ExecAction.RUN_CONT)
                     .nextCont(getNext())
                     .nextNodeToRun(currentNodeToRun)
@@ -51,9 +51,9 @@ public class ExecNodeContInstance extends KsContinuation {
         } else if (currentNodeToRun instanceof KsListNode) {
             KsListNode list = (KsListNode) currentNodeToRun;
             KsNode firstNode = list.getValue();
-            if (firstNode.isWord() && Registry.keywords.containsKey(firstNode.asWord().getValue())) {
+            if (firstNode.isWord() && ExtensionRegistry.keywords.containsKey(firstNode.asWord().getValue())) {
                 String keyword = firstNode.asWord().getValue();
-                KsContinuation newCont = Registry.keywords.get(keyword).apply(getNext(), list);
+                KsContinuation newCont = ExtensionRegistry.keywords.get(keyword).apply(getNext(), list);
                 return newCont.prepareNextRun(state, currentNodeToRun);
             } else {
                 FuncCallContInstance newCont = new FuncCallContInstance(getNext(), list);

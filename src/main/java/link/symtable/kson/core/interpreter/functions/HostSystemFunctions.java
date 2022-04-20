@@ -1,16 +1,21 @@
 package link.symtable.kson.core.interpreter.functions;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import link.symtable.kson.core.interpreter.Env;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.node.KsBoolean;
 import link.symtable.kson.core.node.KsHostSyncFunction;
 import link.symtable.kson.core.node.KsInt64;
 import link.symtable.kson.core.node.KsNode;
+import link.symtable.kson.core.node.KsNumber;
 import link.symtable.kson.core.util.ArgsCountNotMatchException;
 
-public class HostIOFunctions {
+public class HostSystemFunctions {
     public static void exportToEnv(Env env) {
-        env.define("write_line", new KsHostSyncFunction("write_line", 1, true, HostIOFunctions::writeLine));
+        env.define("write_line", new KsHostSyncFunction("write_line", 1, true, HostSystemFunctions::writeLine));
+        env.define("sleep", new KsHostSyncFunction("sleep", 1, false, HostSystemFunctions::sleep));
     }
 
     public static KsNode writeLine(ExecState state, KsNode[] args) {

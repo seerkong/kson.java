@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import link.symtable.kson.core.interpreter.ContRunResult;
+import link.symtable.kson.core.interpreter.ContRunState;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.node.KsContinuation;
@@ -31,10 +31,10 @@ public class MapContInstance extends KsContinuation {
 
     }
 
-    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
+    public ContRunState prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         if (pendingPairs.size() == 0) {
             KsMap map = new KsMap(evaledPairs);
-            return ContRunResult.builder()
+            return ContRunState.builder()
                     .nextAction(ExecAction.RUN_CONT)
                     .nextCont(getNext())
                     .nextNodeToRun(currentNodeToRun)
@@ -49,7 +49,7 @@ public class MapContInstance extends KsContinuation {
     }
 
     @Override
-    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunState runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         evaledPairs.add(new ImmutablePair<>(currentPair.getKey(), lastValue));
         return prepareNextRun(state, currentNodeToRun);
     }

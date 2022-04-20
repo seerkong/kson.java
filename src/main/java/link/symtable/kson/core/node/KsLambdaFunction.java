@@ -10,13 +10,26 @@ public class KsLambdaFunction extends KsFunction {
     private List<String> paramNames = new ArrayList<>();
     private KsListNode block;
 
-    public KsLambdaFunction(String name, KsListNode args, KsListNode block) {
+    public KsLambdaFunction(KsListNode declareExpr) {
+        if (declareExpr.getNext().getValue().isWord()) {
+            this.name = declareExpr.getNext().getValue().asWord().getValue();
+            declareExpr = declareExpr.getNext().getNext();
+        } else {
+            declareExpr = declareExpr.getNext();
+        }
+        KsArray params = declareExpr.getValue().asArray();
+        for (int i = 0; i < params.size(); i++) {
+            paramNames.add(params.get(i).asWord().getValue());
+        }
+
+        block = declareExpr.getNext();
+    }
+
+    public KsLambdaFunction(String name, KsArray params, KsListNode block) {
         this.name = name;
 
-        KsListNode iter = args;
-        while (iter != KsListNode.NIL) {
-            paramNames.add(iter.getValue().asWord().getValue());
-            iter = iter.getNext();
+        for (int i = 0; i < params.size(); i++) {
+            paramNames.add(params.get(i).asWord().getValue());
         }
         this.block = block;
 

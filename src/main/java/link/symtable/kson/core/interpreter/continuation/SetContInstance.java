@@ -1,6 +1,6 @@
 package link.symtable.kson.core.interpreter.continuation;
 
-import link.symtable.kson.core.interpreter.ContRunResult;
+import link.symtable.kson.core.interpreter.ContRunState;
 import link.symtable.kson.core.interpreter.Env;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
@@ -22,17 +22,17 @@ public class SetContInstance extends KsContinuation {
         varValueExpr = expr.getNext().getNext().getValue();
     }
 
-    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
+    public ContRunState prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         KsNode nextToRun = varValueExpr;
         ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
         return nextCont.prepareNextRun(state, nextToRun);
     }
 
     @Override
-    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunState runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         Env varDeclaredAtEnv = getEnv().lookupDeclareEnv(varName);
         varDeclaredAtEnv.define(varName, lastValue);
-        return ContRunResult.builder()
+        return ContRunState.builder()
                 .nextAction(ExecAction.RUN_CONT)
                 .nextCont(getNext())
                 .nextNodeToRun(currentNodeToRun)

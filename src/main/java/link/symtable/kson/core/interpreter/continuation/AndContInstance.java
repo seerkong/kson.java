@@ -2,7 +2,7 @@ package link.symtable.kson.core.interpreter.continuation;
 
 import java.util.LinkedList;
 
-import link.symtable.kson.core.interpreter.ContRunResult;
+import link.symtable.kson.core.interpreter.ContRunState;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.node.KsBoolean;
@@ -25,9 +25,9 @@ public class AndContInstance extends KsContinuation {
         }
     }
 
-    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
+    public ContRunState prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         if (pendingNodes.size() == 0) {
-            return ContRunResult.builder()
+            return ContRunState.builder()
                     .nextAction(ExecAction.RUN_CONT)
                     .nextCont(getNext())
                     .nextNodeToRun(currentNodeToRun)
@@ -41,11 +41,11 @@ public class AndContInstance extends KsContinuation {
     }
 
     @Override
-    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunState runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         if (lastValue.toBoolean()) {
             return prepareNextRun(state, currentNodeToRun);
         } else {
-            return ContRunResult.builder()
+            return ContRunState.builder()
                     .nextAction(ExecAction.RUN_CONT)
                     .nextCont(getNext())
                     .nextNodeToRun(currentNodeToRun)

@@ -82,6 +82,13 @@ public class KsArray extends KsContainerNode implements SupportMethodCall {
         return value.size();
     }
 
+    public void shift(KsNode v) {
+        List<KsNode> newItems = new ArrayList<>();
+        newItems.add(v);
+        newItems.addAll(this.value);
+        this.value = newItems;
+    }
+
     public boolean isArray() {
         return true;
     }

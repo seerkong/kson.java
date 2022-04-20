@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import link.symtable.kson.core.interpreter.ContRunResult;
+import link.symtable.kson.core.interpreter.ContRunState;
 import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.interpreter.oopsupport.SupportMethodCall;
@@ -50,7 +50,7 @@ public class MethodCallContInstance extends KsContinuation {
         }
     }
 
-    public ContRunResult prepareNextRun(ExecState state, KsNode currentNodeToRun) {
+    public ContRunState prepareNextRun(ExecState state, KsNode currentNodeToRun) {
         if (targetEvaled == null) {
             ExecNodeContInstance nextCont = new ExecNodeContInstance(this);
             return nextCont.prepareNextRun(state, targetNode);
@@ -77,7 +77,7 @@ public class MethodCallContInstance extends KsContinuation {
                 KsNode[] argsArr = currentApplyMethodTask.getRight().getItems().toArray(new KsNode[0]);
 
                 targetNode = ((SupportMethodCall) targetNode).callMethod(state, methodName, argsArr);
-                return ContRunResult.builder()
+                return ContRunState.builder()
                         .nextAction(ExecAction.RUN_CONT)
                         .nextCont(this)
                         .nextNodeToRun(currentNodeToRun)
@@ -89,7 +89,7 @@ public class MethodCallContInstance extends KsContinuation {
 
         } else {
             // all jobs finished
-            return ContRunResult.builder()
+            return ContRunState.builder()
                     .nextAction(ExecAction.RUN_CONT)
                     .nextCont(getNext())
                     .nextNodeToRun(currentNodeToRun)
@@ -99,7 +99,7 @@ public class MethodCallContInstance extends KsContinuation {
     }
 
     @Override
-    public ContRunResult runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
+    public ContRunState runWithValue(ExecState state, KsNode lastValue, KsNode currentNodeToRun) {
         if (currentEvalArgsTask == null) {
             // step1 eval first target
             targetEvaled = lastValue;
