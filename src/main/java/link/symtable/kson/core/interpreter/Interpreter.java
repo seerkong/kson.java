@@ -4,7 +4,9 @@ import java.util.concurrent.TimeUnit;
 
 import link.symtable.kson.core.interpreter.continuation.ExecNodeContInstance;
 import link.symtable.kson.core.interpreter.continuation.LandCallbackContInstance;
-import link.symtable.kson.core.interpreter.continuation.WaitTaskContInstance;
+import link.symtable.kson.core.interpreter.continuation.NopContInstance;
+import link.symtable.kson.core.interpreter.continuation.WaitMultiTaskContInstance;
+import link.symtable.kson.core.interpreter.continuation.WaitSingleTaskContInstance;
 import link.symtable.kson.core.interpreter.functions.HostSystemFunctions;
 import link.symtable.kson.core.interpreter.functions.HostPrimitiveFuctions;
 import link.symtable.kson.core.node.KsNode;
@@ -63,29 +65,47 @@ public class Interpreter {
                     r.nextAction = ExecAction.FINISH;
                     break;
             }
-            log.info("");
         }
 
         return r;
     }
 
     private boolean isSafePoint(ContRunState r) {
-        return r.isSafePoint || r.nextCont instanceof LandContInstance;
+        return r.isSafePoint
+                || r.nextCont instanceof LandContInstance
+                || r.nextCont instanceof WaitSingleTaskContInstance
+                || r.nextCont instanceof WaitMultiTaskContInstance;
     }
 
     private boolean isCallbackFinished(ContRunState r) {
         return r.nextCont instanceof LandCallbackContInstance;
     }
 
+    private boolean isWaitLoop(ContRunState r) {
+        return r.nextCont instanceof NopContInstance;
+    }
+
     private boolean isWaitTaskContPoint(ExecState state, ContRunState r) {
         return (state.getWaitingResumeTasks().size() > 0 || state.getTimerTasks().size() > 0)
-                && (r.nextCont instanceof LandContInstance || r.nextCont instanceof WaitTaskContInstance);
+                && (r.nextCont instanceof LandContInstance
+                || isWaitLoop(r)
+//                || r.nextCont instanceof WaitSingleTaskContInstance
+//                || r.nextCont instanceof WaitMultiTaskContInstance
+        );
     }
 
     public ContRunState runCallbackOrRestore(ExecState state, ContRunState contRunStateBeforeCheck) {
-        if (state.hasStoredContRun() && isCallbackFinished(contRunStateBeforeCheck)) {
-            return state.restoreContRunState();
+        if (state.hasStoredContRun()) {
+            if (isCallbackFinished(contRunStateBeforeCheck)
+                    || isWaitLoop(contRunStateBeforeCheck)
+            ) {
+                return state.restoreContRunState();
+            } else {
+                // in callback context
+                return contRunStateBeforeCheck;
+            }
         }
+
         if (state.getCallbackQueue().size() > 0) {
             try {
                 ContRunState callbackState = state.getCallbackQueue().take();

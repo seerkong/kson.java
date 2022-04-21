@@ -17,6 +17,7 @@ import link.symtable.kson.core.node.KsNode;
 public class FuncCallContInstance extends KsContinuation {
     private LinkedList<KsNode> pendingNodes = new LinkedList<>();
     private LinkedList<KsNode> evaledNodes = new LinkedList<>();
+    private KsFunction func; // for debug
 
     public FuncCallContInstance(KsContinuation currentCont, KsListNode nodeToRun) {
         super(currentCont);

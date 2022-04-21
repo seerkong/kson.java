@@ -26,9 +26,10 @@ public class TryContInstance extends KsContinuation  {
             KsWord handlerName = handlerClause.getNextValue().asWord();
 
             KsArray argTable = handlerClause.getNextNextValue().asArray();
-            argTable.shift(new KsWord("resume"));
-            argTable.shift(new KsWord("resolve"));
             argTable.shift(new KsWord("reject"));
+            argTable.shift(new KsWord("resolve"));
+            argTable.shift(new KsWord("resume"));
+
 
             KsListNode handlerBlock = handlerClause.getNextNextNext();
             // make a function cont instance

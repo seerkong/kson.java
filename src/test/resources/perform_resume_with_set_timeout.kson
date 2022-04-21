@@ -1,0 +1,43 @@
+(begin
+    (func run [v1 v2]
+        (write_line "run perform start")
+        (var temp (perform add v1 v2))
+        (write_line "after perform add")
+        (var result (perform multi temp 2))
+        (write_line "after perform multi (temp 2)")
+        (write_line "run perform end")
+        result
+    )
+    (var result)
+    (try
+        (begin
+            (set result (run 1 2))
+        )
+        (handle add [v1 v2]
+            (write_line "before set_timeout in handler add")
+            (set_timeout
+                (func []
+                    (write_line "before resume (+ v1 v2)")
+                    (resume (+ v1 v2))
+                    (write_line "should not go here")
+                )
+                1000
+            )
+            (write_line "after set_timeout in handler add")
+        )
+        (handle multi [v1 v2]
+            (write_line "before set_timeout in handler multi")
+            (set_timeout
+                (func []
+                    (write_line "before resume (* v1 v2)")
+                    (resume (* v1 v2))
+                    (write_line "should not go here")
+                )
+                3000
+            )
+            (write_line "after set_timeout in handler multi")
+        )
+    )
+    (write_line "after try")
+    result
+)

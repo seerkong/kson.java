@@ -32,12 +32,10 @@ public class SetTimeoutContInstance extends KsContinuation {
         FuncCallContInstance contUsedForFuture = new FuncCallContInstance(landCont, funcCallExpr);
         ContRunState callThisCallbackState = contUsedForFuture.prepareNextRun(state, funcCallExpr);
 
-        System.out.println("create set timeout 当前时间戳："+System.currentTimeMillis());
         long timerId = state.getTimerTaskIdGen().getAndIncrement();
         TimerTask tt = new TimerTask() {
             @Override
             public void run() {
-                System.out.println("exec set timeout callback 当前时间戳："+System.currentTimeMillis());
                 state.getTimerTasks().remove(timerId);
                 state.getCallbackQueue().offer(callThisCallbackState);
 //                synchronized (state.getLock()) {

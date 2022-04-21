@@ -1,19 +1,20 @@
 (begin
     (func run [v1 v2]
         (write_line "run perform start")
-        (let temp (perform add (v1 v2)))
-        (write_line "after perform add (v1 v2)")
-        (let result (perform multi (temp 2)))
-        (write_line "after perform multi (temp 2)")
+        (var temp (perform_all (add v1 3) (add v2 7)))
+        (write_line "after perform_all")
+        (var result (perform_all (multi (@ temp 0) (@ temp 1))))
+        (write_line "after perform multi")
         (write_line "run perform end")
         result
     )
-    (let result)
+    (var result)
     (try
         (begin
             (set result (run 1 2))
         )
-        (handle add (v1 v2)
+        (handle add [v1 v2]
+            (write_line "before set_timeout in handler add")
             (set_timeout
                 (func []
                     (write_line "before resume (+ v1 v2)")
@@ -22,8 +23,10 @@
                 )
                 1000
             )
+            (write_line "after set_timeout in handler add")
         )
-        (handle multi (v1 v2)
+        (handle multi [v1 v2]
+            (write_line "before set_timeout in handler multi")
             (set_timeout
                 (func []
                     (write_line "before resume (* v1 v2)")
@@ -32,29 +35,9 @@
                 )
                 1000
             )
-
+            (write_line "after set_timeout in handler multi")
         )
     )
     (write_line "after try")
     result
-)
-
-
-(func run [v1 v2]
-    (write_line "run start")
-    (let temp (perform add (v1 v2)))
-    (let result (perform multi (temp 2)))
-    (write_line "run end")
-    result
-)
-(try
-    (begin
-        (run 1 2)
-    )
-    (handle add (v1 v2)
-        (set_timeout (func [] (resume (+ v1 v2))) 1000)
-    )
-    (handle multi (v1 v2)
-        (set_timeout (func [] (resume (* v1 v2))) 2000)
-    )
 )

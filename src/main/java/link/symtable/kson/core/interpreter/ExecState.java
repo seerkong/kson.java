@@ -13,7 +13,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import link.symtable.kson.core.interpreter.continuation.WaitTaskContInstance;
+import link.symtable.kson.core.interpreter.continuation.WaitMultiTaskContInstance;
 import lombok.Data;
 
 @Data
@@ -22,7 +22,7 @@ public class ExecState {
     final Condition notEmpty = lock.newCondition(); // take thread
     private BlockingQueue<ContRunState> callbackQueue = new LinkedBlockingQueue<>(10);
     private ContRunState storedContRunState;
-    private Set<WaitTaskContInstance> waitingResumeTasks = new HashSet<>();
+    private Set<WaitMultiTaskContInstance> waitingResumeTasks = new HashSet<>();
     private Map<Long, TimerTask> timerTasks = new HashMap<>();
     private Timer timer = new Timer();
     private AtomicLong timerTaskIdGen = new AtomicLong(1);

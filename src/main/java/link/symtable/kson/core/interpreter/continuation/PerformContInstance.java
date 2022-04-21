@@ -5,13 +5,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import link.symtable.kson.core.interpreter.ContRunState;
-import link.symtable.kson.core.interpreter.ExecAction;
 import link.symtable.kson.core.interpreter.ExecState;
 import link.symtable.kson.core.node.KsArray;
 import link.symtable.kson.core.node.KsContinuation;
 import link.symtable.kson.core.node.KsLambdaFunction;
 import link.symtable.kson.core.node.KsListNode;
 import link.symtable.kson.core.node.KsNode;
+import link.symtable.kson.core.node.KsSymbol;
 import link.symtable.kson.core.node.KsWord;
 
 public class PerformContInstance extends KsContinuation {
@@ -19,16 +19,19 @@ public class PerformContInstance extends KsContinuation {
     private LinkedList<KsNode> pendingNodes = new LinkedList<>();
     private LinkedList<KsNode> evaledNodes = new LinkedList<>();
     private boolean needReturnErrors = false;
+    private NopContInstance waitLoopCont;
 
     public PerformContInstance(KsContinuation currentCont, KsListNode expr, boolean needReturnErrors) {
         super(currentCont);
         this.needReturnErrors = needReturnErrors;
+        waitLoopCont = new NopContInstance(currentCont);
         KsWord handlerWord = expr.getNextValue().asWord();
         handlerName = handlerWord.getValue();
 
-        KsArray params = expr.getNextNextValue().asArray();
-        for (int i = 0; i < params.size(); i++) {
-            pendingNodes.add(params.get(i));
+        KsListNode iter = expr.getNextNext().asListNode();
+        while (iter != KsListNode.NIL) {
+            pendingNodes.add(iter.getValue());
+            iter = iter.getNext();
         }
     }
 
@@ -41,16 +44,16 @@ public class PerformContInstance extends KsContinuation {
             KsLambdaFunction performHander = (KsLambdaFunction)handlerAndNextContArr.get(0);
             KsContinuation tryNextCont = (KsContinuation)handlerAndNextContArr.get(1);
 
-            WaitTaskContInstance waitCont = new WaitSingleTaskContInstance(getNext(), handlerName, needReturnErrors);
-            ResumeTaskContInstance resolveCont = new ResumeTaskContInstance(waitCont, handlerName, true);
-            ResumeTaskContInstance rejectCont = new ResumeTaskContInstance(waitCont, handlerName, false);
+            WaitSingleTaskContInstance waitCont = new WaitSingleTaskContInstance(getNext(), handlerName, needReturnErrors);
+            ResumeTaskContInstance resolveCont = new ResumeTaskContInstance(waitCont, new KsSymbol(handlerName), true);
+            ResumeTaskContInstance rejectCont = new ResumeTaskContInstance(waitCont, new KsSymbol(handlerName), false);
 
             List<KsNode> params = new ArrayList<>();
             params.add(resolveCont);    // resume
             params.add(resolveCont);    // resolve
             params.add(rejectCont);    // reject
             params.addAll(evaledNodes);
-            FuncCallContInstance newCont = new FuncCallContInstance(tryNextCont, performHander, params);
+            FuncCallContInstance newCont = new FuncCallContInstance(waitLoopCont, performHander, params);
             return newCont.prepareNextRun(state, currentNodeToRun);
         } else {
             KsNode nextToRun = pendingNodes.pollFirst();

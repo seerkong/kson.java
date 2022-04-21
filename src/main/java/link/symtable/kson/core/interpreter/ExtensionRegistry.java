@@ -9,9 +9,10 @@ import link.symtable.kson.core.interpreter.continuation.BlockContInstance;
 import link.symtable.kson.core.interpreter.continuation.CallccContInstance;
 import link.symtable.kson.core.interpreter.continuation.ConditionContInstance;
 import link.symtable.kson.core.interpreter.continuation.FuncDeclareContInstance;
-import link.symtable.kson.core.interpreter.continuation.LetContInstance;
+import link.symtable.kson.core.interpreter.continuation.VarContInstance;
 import link.symtable.kson.core.interpreter.continuation.MethodCallContInstance;
 import link.symtable.kson.core.interpreter.continuation.OrContInstance;
+import link.symtable.kson.core.interpreter.continuation.PerformAllContInstance;
 import link.symtable.kson.core.interpreter.continuation.PerformContInstance;
 import link.symtable.kson.core.interpreter.continuation.QuoteContInstance;
 import link.symtable.kson.core.interpreter.continuation.SetContInstance;
@@ -26,7 +27,7 @@ public class ExtensionRegistry {
     public static Map<String, BiFunction<KsContinuation, KsListNode, KsContinuation>> keywords = new HashMap<>();
 
     static {
-        keywords.put("let", LetContInstance::new);
+        keywords.put("var", VarContInstance::new);
         keywords.put("set", SetContInstance::new);
         keywords.put("cond", ConditionContInstance::new);
         keywords.put("begin", (nextCont, expr) -> {
@@ -43,6 +44,9 @@ public class ExtensionRegistry {
         keywords.put("try", TryContInstance::new);
         keywords.put("perform", (nextCont, expr) -> {
             return new PerformContInstance(nextCont, expr, false);
+        });
+        keywords.put("perform_all", (nextCont, expr) -> {
+            return new PerformAllContInstance(nextCont, expr, false);
         });
         keywords.put("set_timeout", SetTimeoutContInstance::new);
     }

@@ -8,10 +8,10 @@ import link.symtable.kson.core.node.KsListNode;
 import link.symtable.kson.core.node.KsNode;
 import link.symtable.kson.core.node.KsNull;
 
-public class LetContInstance extends KsContinuation {
+public class VarContInstance extends KsContinuation {
     private String varName;
     private KsNode varValueExpr = null;
-    public LetContInstance(KsContinuation currentCont, KsListNode expr) {
+    public VarContInstance(KsContinuation currentCont, KsListNode expr) {
         super(currentCont);
         if (expr.getNext() == KsListNode.NIL) {
             throw new RuntimeException("illegal let expr");
