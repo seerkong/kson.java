@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 
-import link.symtable.kson.core.interpreter.ExecState;
-import link.symtable.kson.core.interpreter.oopsupport.SupportMethodCall;
+import link.symtable.kson.core.cpsinterpreter.ExecState;
+import link.symtable.kson.core.cpsinterpreter.oopsupport.SupportMethodCall;
 
 import lombok.Getter;
 

@@ -8,10 +8,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.NotImplementedException;
 
-import link.symtable.kson.core.interpreter.ExecState;
+import link.symtable.kson.core.cpsinterpreter.ExecState;
 
 import lombok.Data;
-import lombok.Getter;
 
 @Data
 public class KsListNode extends KsContainerNode {

@@ -1,8 +1,8 @@
 package link.symtable.kson.core.node;
 
-import link.symtable.kson.core.interpreter.ContRunState;
-import link.symtable.kson.core.interpreter.Env;
-import link.symtable.kson.core.interpreter.ExecState;
+import link.symtable.kson.core.cpsinterpreter.ContRunState;
+import link.symtable.kson.core.cpsinterpreter.Env;
+import link.symtable.kson.core.cpsinterpreter.ExecState;
 
 public abstract class KsContinuation extends KsNodeBase {
     private KsContinuation nextCont;

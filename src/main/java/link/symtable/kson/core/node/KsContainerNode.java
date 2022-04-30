@@ -2,8 +2,8 @@ package link.symtable.kson.core.node;
 
 import org.apache.commons.lang3.NotImplementedException;
 
-import link.symtable.kson.core.interpreter.ExecState;
-import link.symtable.kson.core.interpreter.oopsupport.SupportSubscript;
+import link.symtable.kson.core.cpsinterpreter.ExecState;
+import link.symtable.kson.core.cpsinterpreter.oopsupport.SupportSubscript;
 
 public abstract class KsContainerNode extends KsNodeBase implements SupportSubscript {
     public boolean subscriptAcceptKey(ExecState state, String fieldName) {

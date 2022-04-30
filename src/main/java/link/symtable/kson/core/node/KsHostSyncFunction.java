@@ -2,7 +2,7 @@ package link.symtable.kson.core.node;
 
 import java.util.function.BiFunction;
 
-import link.symtable.kson.core.interpreter.ExecState;
+import link.symtable.kson.core.cpsinterpreter.ExecState;
 
 import lombok.Getter;
 

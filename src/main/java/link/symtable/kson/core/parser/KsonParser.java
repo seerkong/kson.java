@@ -218,8 +218,7 @@ public class KsonParser {
                 .charValue();
         Integer num = Integer.parseInt(t, 16);
         char c = (char) ('\0' + num);
-        String r = "" + c;
-        return r.charAt(0);
+        return c;
     }
 
 
